@@ -3,6 +3,7 @@
 // @author postman
 // @version 0.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
+// @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/blob/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
 // ==/UserScript==
 
