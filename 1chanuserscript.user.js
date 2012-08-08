@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name 1chan Extension Tools
-// @author postman ayakudere
+// @author postman, ayakudere
 // @version 0.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/blob/master/1chanuserscript.user.js
@@ -53,7 +53,7 @@
     }
     
     function addTextToForm(text) {
-      document.getElementById("comment_form_text").textContent += text;
+      document.getElementById("comment_form_text").value += text;
     };
     
     function createSmile(name, ext) {
