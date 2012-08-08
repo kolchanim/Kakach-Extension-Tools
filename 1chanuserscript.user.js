@@ -58,12 +58,13 @@
     
     function createSmile(name, ext) {
       var image = document.createElement("img");
-      var link  = document.createElement("a");
+      var link = document.createElement("a");
       link.href = "#";
       link.onclick = function() {
         addTextToForm(":" + name + ":");
         return false;
       };
+      link.title = name;
       image.src = "http://1chan.ru/img/" + name + ext;
       link.appendChild(image);
       return link;
