@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name 1chan Extension Tools
-// @author postman
+// @author postman ayakudere
 // @version 0.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/blob/master/1chanuserscript.user.js
@@ -30,6 +30,7 @@
         container.appendChild(document.createElement('p'))
         container = container.lastChild
         container.style.margin = '0px'
+        container.style.padding = '4px'
         container.style.fontSize = '0.8em'
         container.textContent = "Ответы: "
         for(post_ref in table[post_num])
