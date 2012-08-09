@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.3
+// @version 0.3.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -56,8 +56,9 @@
               link.textContent = ">>"+table[post_num][post_ref]
               link.style.fontSize = '1em'
               container.appendChild(link)
-              container.innerHTML += '; '
+              container.innerHTML += ', '
           }
+          container.innerHTML = container.innerHTML.substring(0, container.innerHTML.length-2)
           comment = document.getElementById("comment_"+post_num)
           if(comment)
               comment.appendChild(container.parentNode)
