@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.3.1
+// @version 0.3.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -9,13 +9,14 @@
 
     // Globals
 
-    var formTextarea = document.getElementById("comment_form_text");
+    var formTextarea; 
 
     if(navigator.appName == "Opera")
       document.addEventListener('DOMContentLoaded', function() {
         createRepliesMap();
         createSmilePanel();
         createMarkupPanel();
+        formTextarea = document.getElementById("comment_form_text");
       })
     
     // Replies map
@@ -232,4 +233,5 @@
         createRepliesMap();
         createSmilePanel();
         createMarkupPanel();
+        formTextarea = document.getElementById("comment_form_text");
     }
