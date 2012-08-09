@@ -226,11 +226,11 @@ function createMarkupPanel() {
     for(var k in markup)
     {
         var newButton = createButton(k, function() {
-        var text = getSelectionText(formTextarea);
-        var formText = formTextarea.value;
-        formTextarea.value  = formText.slice(0, formTextarea.selectionStart) +
-                                wrapText(text, markup[this.value][0]) +
-                                formText.slice(formTextarea.selectionEnd);
+            var text = getSelectionText(formTextarea);
+            var formText = formTextarea.value;
+            formTextarea.value  = formText.slice(0, formTextarea.selectionStart) +
+                                    wrapText(text, markup[this.value][0]) +
+                                    formText.slice(formTextarea.selectionEnd);
         });
         container.appendChild(newButton);
     }
