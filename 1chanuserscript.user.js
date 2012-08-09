@@ -41,7 +41,6 @@
       {
           container = document.createElement("div")
           container.id = "answers_"+post_num
-          container.style.color = 'gray'
           container.appendChild(document.createElement('p'))
           container = container.lastChild
           container.style.margin = '0px'
