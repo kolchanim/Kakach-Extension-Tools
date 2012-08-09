@@ -13,9 +13,9 @@ var formTextarea;
 if(navigator.appName == "Opera")
     document.addEventListener('DOMContentLoaded', function() {
     createRepliesMap();
-    createSmilePanel();
+    formTextarea = document.getElementById("comment_form_text")
     createMarkupPanel();
-    formTextarea = document.getElementById("comment_form_text");
+    createSmilePanel();
     })
 
 // Replies map
@@ -110,7 +110,17 @@ function createSmilePanel() {
     container.style.paddingLeft = "8px";
     container.style.border = "1px solid #CCCCCC";
     container.style.borderRadius = "5px 5px 5px 5px"
-    document.getElementById("comment_form").insertBefore(container, document.getElementsByClassName("b-comment-form")[0]);
+    if(!formTextarea)
+    {
+        container.style.paddingLeft = "0px"
+        container.style.borderRadius = "0px"
+        container.style.margin = "0px"
+        document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
+                                                    document.getElementsByName('text_full')[0])
+    }
+    else
+        document.getElementById("comment_form").insertBefore(container, 
+                                                    document.getElementsByClassName("b-comment-form")[0]);
 }
 
 // Markup panel
@@ -240,14 +250,24 @@ function createMarkupPanel() {
         container.appendChild(newButton);
     }
     container.style.paddingTop = "4px";
-    document.getElementsByClassName("b-comment-form")[0].appendChild(container);
+    if(!formTextarea)
+    {
+        document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
+                                                    document.getElementsByName('text_full')[0])
+        document.addEventListener('focus', function(event){
+            if(typeof(event.target) == 'HTMLTextAreaElement')
+                formTextarea = event.target
+            console.log(formTextarea)
+            })
+    } else
+        document.getElementsByClassName("b-comment-form")[0].appendChild(container);
 }
 
 // Main 
 if(navigator.appName != "Opera")
 {   
     createRepliesMap();
-    createSmilePanel();
-    createMarkupPanel();
     formTextarea = document.getElementById("comment_form_text");
+    createMarkupPanel();
+    createSmilePanel();
 }
