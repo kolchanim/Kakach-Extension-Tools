@@ -157,12 +157,20 @@
       
       if (text.length > 0) {
         var formText = formTextarea.value;
+        var lines = text.split("\n");
+        for(var i in lines) {
+          lines[i] = ">>" + lines[i].trim() + "<<";
+        }
         formTextarea.value = formText.slice(0, formTextarea.selectionStart) +
-                             ">" +
-                             formText.slice(formTextarea.selectionStart);
+                             lines.join("\n") +
+                             formText.slice(formTextarea.selectionEnd);
       } else {
-        text = getSelection();
-        formTextarea.value += ">" + text;
+        text = getSelection().getRangeAt(0).toString();
+        var lines = text.split("\n");
+        for(var i in lines) {
+          lines[i] = ">" + lines[i].trim();
+        }
+        formTextarea.value += lines.join("\n");
       }
     }
     
