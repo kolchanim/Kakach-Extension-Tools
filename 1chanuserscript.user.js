@@ -66,7 +66,10 @@ function createRepliesMap() {
   
 // Smile panel
 function addTextToForm(text) {
-    formTextarea.value += text;
+    cursor_pos = formTextarea.selectionStart;
+    formTextarea.value = formTextarea.value.substring(0, cursor_pos)
+                            + text + formTextarea.value.substring(cursor_pos, formTextarea.value.length);
+    formTextarea.setSelectionRange(cursor_pos + text.length, cursor_pos + text.length)
 };
 
 function createSmile(name, ext) {
@@ -75,8 +78,10 @@ function createSmile(name, ext) {
     var link = document.createElement("a");
   
     link.href = "#";
-    link.onclick = function() {
+    link.onclick = function(e) {
+        e.preventDefault = true
         addTextToForm(":" + name + ":");
+        formTextarea.focus()
         return false;
     };
     link.title = name;
