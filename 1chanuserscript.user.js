@@ -257,7 +257,6 @@ function createMarkupPanel() {
         document.addEventListener('click', function(event){
             if(/text/.test(event.target.name))
                 formTextarea = event.target // Смена полей в news/add
-            console.log(formTextarea)
             })
     } else
         document.getElementsByClassName("b-comment-form")[0].appendChild(container);
