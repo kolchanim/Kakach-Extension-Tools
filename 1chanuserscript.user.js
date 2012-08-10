@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.4.1
+// @version 0.4.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -261,10 +261,10 @@ function bigBoldClick() {
 
 function bigImgClick() {
   
-    var link = getSelectionText(formTextarea);
+    var link = prompt('Ссылка на изображение:');
   
-    if (link.length === 0) 
-        link = prompt('Ссылка на изображение:');
+    if (!link) 
+        return false;
     addTextToForm('"' + wrapImageLink(link) + '":' + link + '');
 }
 
