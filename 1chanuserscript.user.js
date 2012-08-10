@@ -286,16 +286,20 @@ function createMarkupPanel() {
         });
         container.appendChild(newButton);
     }
-    container.style.paddingTop = "4px";
+    
     if(!formTextarea) {
+        container.style.paddingTop = "4px";
         document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
                                                     document.getElementsByName('text_full')[0])
         document.addEventListener('click', function(event){
             if(/text/.test(event.target.name))
                 formTextarea = event.target // Смена полей в news/add
             })
-    } else
-        document.getElementsByClassName("b-comment-form")[0].appendChild(container);
+    } else {
+        container.style.display = "inline-block";
+        document.getElementById("comment_form_text").parentNode.insertBefore(container, 
+                        document.getElementsByClassName("b-comment-form_b-uplink")[0]);
+    }
 }
 
 // Main 
