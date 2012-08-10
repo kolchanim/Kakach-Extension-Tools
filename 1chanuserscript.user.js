@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.3.3
+// @version 0.3.4
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -106,21 +106,22 @@ function createSmilePanel() {
     {
         container.appendChild(createSmile(pngSmileList[i], ".png"));
     }
-    container.style.margin = "10px";
-    container.style.paddingLeft = "8px";
-    container.style.border = "1px solid #CCCCCC";
-    container.style.borderRadius = "5px 5px 5px 5px"
-    if(!formTextarea)
+    if(!formTextarea) // news/add
     {
-        container.style.paddingLeft = "0px"
-        container.style.borderRadius = "0px"
-        container.style.margin = "0px"
+        container.style.width = '530px'
+        container.style.border = "1px solid #999999";
         document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
                                                     document.getElementsByName('text_full')[0])
     }
     else
+    {
+        container.style.margin = "10px";
+        container.style.paddingLeft = "8px";
+        container.style.border = "1px solid #CCCCCC";
+        container.style.borderRadius = "5px 5px 5px 5px"
         document.getElementById("comment_form").insertBefore(container, 
                                                     document.getElementsByClassName("b-comment-form")[0]);
+    }
 }
 
 // Markup panel
