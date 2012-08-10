@@ -254,9 +254,9 @@ function createMarkupPanel() {
     {
         document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
                                                     document.getElementsByName('text_full')[0])
-        document.addEventListener('focus', function(event){
-            if(typeof(event.target) == 'HTMLTextAreaElement')
-                formTextarea = event.target
+        document.addEventListener('click', function(event){
+            if(/text/.test(event.target.name))
+                formTextarea = event.target // Смена полей в news/add
             console.log(formTextarea)
             })
     } else
