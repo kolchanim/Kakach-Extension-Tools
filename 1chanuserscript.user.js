@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.3.5
+// @version 0.4.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -215,10 +215,9 @@ function imgClick() {
     var link = getSelectionText(formTextarea);
   
     if (link.length > 0) {
-        var formText = formTextarea.value;
         addTextToForm(wrapImageLink(link));
     } else {
-        formTextarea.value += wrapImageLink(prompt('Ссылка на изображение:'));
+        addTextToForm(wrapImageLink(prompt('Ссылка на изображение:')));
     }
 }
 
@@ -254,12 +253,21 @@ function bigBoldClick() {
             if (lines[i] !== "") 
                 lines[i] += stars;
         }
-        var formText = formTextarea.value;
         addTextToForm(lines.join("\n")); 
     } else {
         formTextarea.value += stars;
     }
 }
+
+function bigImgClick() {
+  
+    var link = getSelectionText(formTextarea);
+  
+    if (link.length === 0) 
+        link = prompt('Ссылка на изображение:');
+    addTextToForm('"' + wrapImageLink(link) + '":' + link + '');
+}
+
 
 function createMarkupPanel() {
   
@@ -273,15 +281,16 @@ function createMarkupPanel() {
     var imgButton = createButton("img", imgClick);
     var quoteButton = createButton(">", quoteClick);
     var bigBoldButton = createButton("BB", bigBoldClick);
+    var bigImgButton = createButton("BigImg", bigImgClick);
   
     container.appendChild(imgButton);
+    container.appendChild(bigImgButton);
     container.appendChild(quoteButton);
     container.appendChild(bigBoldButton);
   
     for(var k in markup) {
         var newButton = createButton(k, function() {
             var text = getSelectionText(formTextarea);
-            var formText = formTextarea.value;
             addTextToForm(wrapText(text, markup[this.value][0]));
         });
         container.appendChild(newButton);
