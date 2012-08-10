@@ -189,13 +189,12 @@ function quoteClick() {
                             formText.slice(formTextarea.selectionEnd);
     } else 
     {
-        text = getSelection().getRangeAt(0).toString();
+        text = document.getSelection().toString();
         var lines = text.split("\n");
-        for(var i in lines) 
-        {
-            lines[i] = ">" + lines[i].trim();
+        for(var i in lines) {
+          lines[i] = ">" + lines[i].trim();
         }
-        formTextarea.value += lines.join("\n");
+        addTextToForm(lines.join("\n"));
     }
 }
 
