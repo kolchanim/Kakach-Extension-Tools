@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.5.1
+// @version 0.5.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -227,13 +227,14 @@ function addSmileClick(e) {
     if (!link)
         return false;
     
-    if (/rghost/.test(link)) {
-        var num = /(\d+)\D*$/.exec(link)[1];
-        link = "http://rghost.ru/" + num + "/image.png";
-    }
     image.src = link;
     image.onerror = function() {
-        alert("Ошибка при загрузке картинки");
+        var num = /(\d+)\D*$/.exec(link)[1];
+        link = "http://rghost.ru/" + num + "/image.png";
+        image.src = link;
+        image.onerror = function() {
+            alert("Ошибка при загрузке картинки");
+        }
     }
     image.onload = function() {
         if (image.width > 45 || image.heigth > 45) {
