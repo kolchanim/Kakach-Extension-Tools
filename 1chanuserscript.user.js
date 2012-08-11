@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.5.0
+// @version 0.5.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -203,6 +203,7 @@ function addCustomImage(link, name) {
     newImage.id = id;
     newImage.setAttribute("class", "add-image-button");
     document.getElementById("image-container").appendChild(newImage);
+    document.getElementById("image-container").style.display = "block";
 }
 
 function removeCustomSmile(id) {
@@ -325,19 +326,20 @@ function createSmilePanel() {
             images.push(key);
     }
     
-    if (images.length > 0) {
+    imageContainer.id = "image-container";
+    imageContainer.style.margin = "5px 6px 7px 0px";
+    imageContainer.style.paddingTop = "2px";
+    imageContainer.style.borderTop = "1px dashed #CCCCCC";
         
-        imageContainer.id = "image-container";
-        imageContainer.style.margin = "5px 6px 7px 0px";
-        imageContainer.style.paddingTop = "2px";
-        imageContainer.style.borderTop = "1px dashed #CCCCCC";
+    container.appendChild(imageContainer);
         
-        container.appendChild(imageContainer);
-        
-        for(var i in images) {
-            var name = /^image-(.+)$/.exec(images[i])[1];
-            addCustomImage(localStorage.getItem(images[i]), name);
-        }
+    for(var i in images) {
+        var name = /^image-(.+)$/.exec(images[i])[1];
+        addCustomImage(localStorage.getItem(images[i]), name);
+    }
+    
+    if (images.length === 0) {
+        imageContainer.style.display = "none";
     }
 }
 
