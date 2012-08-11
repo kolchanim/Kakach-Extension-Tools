@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.4.2
+// @version 0.5.0
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
 // ==/UserScript==
 
 // Globals
-var formTextarea; 
+var formTextarea;
+var deletingSmiles = false;
 
 if(navigator.appName == "Opera")
     document.addEventListener('DOMContentLoaded', function() {
@@ -16,6 +17,7 @@ if(navigator.appName == "Opera")
         formTextarea = document.getElementById("comment_form_text");
         createMarkupPanel();
         createSmilePanel();
+        registerAutoupdateHandler();
     });
 
 // Replies map
@@ -61,6 +63,42 @@ function createRepliesMap() {
   }
 }
   
+function registerAutoupdateHandler() {
+    document.getElementsByClassName("l-comments-wrap")[0].addEventListener('DOMNodeInserted',
+        function(event) {
+            if(/comment/.test(event.target.id)) {
+                refs = event.target.getElementsByClassName("js-cross-link");
+                for(var j=0; j<refs.length; j++) {
+                    ref = refs[j].name.slice(5);
+                    link = document.createElement("a");
+                    link.className = "js-cross-link";
+                    link.href = document.URL + '#' + event.target.id.slice(8);
+                    link.name = "news/" + event.target.id.slice(8);
+                    link.textContent = ">>" + event.target.id.slice(8);
+                    link.style.fontSize = '1em';
+                    if(container = document.getElementById('answers_'+ref)) { // да, именно =
+                        container = container.lastChild
+                        container.innerHTML += ', ';
+                        container.appendChild(link)
+                    } else {
+                        container = document.createElement("div");
+                        container.id = "answers_" + ref;
+                        container.appendChild(document.createElement('p'));
+                        container = container.lastChild;
+                        container.style.margin = '0px';
+                        container.style.padding = '4px';
+                        container.style.fontSize = '0.8em';
+                        container.textContent = "Ответы: ";
+                        container.appendChild(link)
+                        comment = document.getElementById("comment_" + ref);
+                        if(comment)
+                            comment.appendChild(container.parentNode);
+                    }
+                }
+            }
+        });
+}
+
 // Smile panel
 function addTextToForm(text) {
     cursor_pos = formTextarea.selectionStart;
@@ -78,9 +116,13 @@ function createSmile(text, imgLink) {
   
     link.href = "#";
     link.onclick = function(e) {
+        if (deletingSmiles) {
+            removeCustomSmile(this.id);
+        } else {
+            addTextToForm(text);
+            formTextarea.focus();
+        }
         e.preventDefault();
-        addTextToForm(text);
-        formTextarea.focus();
         return false;
     };
     link.title = text;
@@ -91,22 +133,76 @@ function createSmile(text, imgLink) {
     return link;
 }
 
-function createCustomSmile(e) {
-    e.preventDefault();
-    var rghostLink = prompt("Ссылка на ргхост(или номер файла):");
-    var num = /(\d+)\D*$/.exec(rghostLink)[1];
-    if (!num) {
-        alert("Не получилось найти номер шмайлика");
-        return false;
-    }
+function createCustomSmile(num) {
+
     var id  = "smile-"+num;
+    
     if (localStorage.getItem(id)) {
         alert("Такой шмайлик уже добавлен");
         return false;
     }
     addCustomSmile(num)
     localStorage.setItem(id, "http://rghost.ru/"+num+"/image.png");
-    return false;
+}
+
+function createCustomImage(link) {
+    
+    var name = prompt("Имя для картинки:");
+    var id = "image-" + name;
+    
+    if (localStorage.getItem(id)) {
+        alert("Уже есть картинка с таким именем");
+        return false;
+    }
+    addCustomImage(link, name);
+    localStorage.setItem(id, link);
+}
+
+function addCustomSmile(num) {
+    
+    var id  = "smile-"+num;
+    var newSmile = createSmile('[:'+num+':]', "http://rghost.ru/"+num+"/image.png");
+    
+    newSmile.onmousedown = function(e) {
+        if (e.which === 2) {
+            removeCustomSmile(this.id);
+        }
+        return false;
+    };
+    newSmile.title = "Средняя кнопка мыши для удаления";
+    newSmile.id = id;
+    newSmile.setAttribute("class", "add-smile-link");
+    document.getElementById("smile-panel").insertBefore(newSmile,
+                                                    document.getElementById("image-container"));
+}
+
+function addCustomImage(link, name) {
+    
+    var id = "image-" + name;
+    var newImage = createButton(name, function(e) {
+        if (deletingSmiles) {
+            removeCustomImage(this.id);
+        } else {
+            if (/rghost/.test(link)) 
+                addTextToForm('[:' + /\d+/.exec(link)[0] + ':]');
+            else 
+                addTextToForm('[' + link + ']');
+            formTextarea.focus();
+        }
+        e.preventDefault();
+        return false;
+    });
+    
+    newImage.onmousedown = function(e) {
+        if (e.which === 2) {
+            removeCustomSmile(this.id);
+        }
+        return false;
+    };
+    
+    newImage.id = id;
+    newImage.setAttribute("class", "add-image-button");
+    document.getElementById("image-container").appendChild(newImage);
 }
 
 function removeCustomSmile(id) {
@@ -114,18 +210,52 @@ function removeCustomSmile(id) {
     document.getElementById("smile-panel").removeChild(document.getElementById(id));
 }
 
-function addCustomSmile(num) {
-    var id  = "smile-"+num;
-    var newSmile = createSmile('[:'+num+':]', "http://rghost.ru/"+num+"/image.png");
-    newSmile.onmousedown = function(e) {
-        if (e.which !== 1) {
-            removeCustomSmile(this.id);
-        }
+function removeCustomImage(id) {
+    localStorage.removeItem(id);
+    document.getElementById("image-container").removeChild(document.getElementById(id));
+}
+
+function addSmileClick(e) {
+    
+    var link = prompt("Ссылка на картинку или номер файла на ргхосте:");
+    var image = new Image();
+    
+    if (!link)
         return false;
-    };
-    newSmile.title = "Средняя кнопка мыши для удаления";
-    newSmile.id = id;
-    document.getElementById("smile-panel").appendChild(newSmile);
+    
+    if (/rghost/.test(link)) {
+        var num = /(\d+)\D*$/.exec(link)[1];
+        link = "http://rghost.ru/" + num + "/image.png";
+    }
+    image.src = link;
+    image.onerror = function() {
+        alert("Ошибка при загрузке картинки");
+    }
+    image.onload = function() {
+        if (image.width > 45 || image.heigth > 45) {
+            createCustomImage(link);
+        } else {
+            createCustomSmile(num);
+        }
+    }
+    
+    e.preventDefault();
+    return false;
+}
+
+function removeSmilesClick(e) {
+    const redCross = "http://1chan.ru/ico/remove.gif";
+    const whiteCross = "http://1chan.ru/ico/delete.gif";
+    
+    if (!deletingSmiles) {
+        document.getElementById("remove-smiles-icon").src = whiteCross;
+        deletingSmiles = true;
+    } else {
+        document.getElementById("remove-smiles-icon").src = redCross;
+        deletingSmiles = false;
+    }
+    e.preventDefault();
+    return false;
 }
 
 function createSmilePanel() {
@@ -133,6 +263,7 @@ function createSmilePanel() {
     var container = document.createElement("div");
     var gifSmileList = [ "coolface", "desu", "nyan", "sobak", "trollface"];
     var pngSmileList = ["awesome", "ffuu", "okay", "rage"];
+    var imageContainer = document.createElement("div");
     
     for(var i in gifSmileList) {
         var newSmile = createSmile(':'+gifSmileList[i]+':', "http://1chan.ru/img/" + gifSmileList[i] + ".gif"); 
@@ -144,23 +275,35 @@ function createSmilePanel() {
     }
     
     var addSmileLink  = document.createElement("a");
+    var addSmileImg = document.createElement("img");
+    addSmileImg.src = "http://cdn1.iconfinder.com/data/icons/basicset/plus_16.png";
     addSmileLink.href = "#";
-    addSmileLink.onclick = createCustomSmile;
-    addSmileImg = document.createElement("img");
-    addSmileImg.src = "http://cdn1.iconfinder.com/data/icons/basicset/plus_32.png"
+    addSmileLink.onclick = addSmileClick;
     addSmileLink.appendChild(addSmileImg);
     addSmileLink.style.cssFloat = "right";
-    addSmileLink.style.margin = "11px 5px 5px 5px"
-    addSmileLink.title = "Добавить шмайлик";
+    addSmileLink.style.margin = "5px 5px 5px 5px"
+    addSmileLink.title = "Добавить шмайлик или картинку";
+    
+    var removeSmilesLink  = document.createElement("a");
+    var removeSmilesImg = document.createElement("img");
+    removeSmilesImg.src = "http://1chan.ru/ico/remove.gif";
+    removeSmilesImg.id = "remove-smiles-icon";
+    removeSmilesLink.href = "#";
+    removeSmilesLink.onclick = removeSmilesClick;
+    removeSmilesLink.appendChild(removeSmilesImg);
+    removeSmilesLink.style.cssFloat = "right";
+    removeSmilesLink.style.margin = "30px -20px 5px 5px"
+    removeSmilesLink.title = "Удалить шмайлики или картинки";
     
     container.appendChild(addSmileLink);
+    container.appendChild(removeSmilesLink);
     
     if(!formTextarea) { // news/add
         container.style.width = '530px'
         container.style.border = "1px solid #999999";
         container.id = "smile-panel";
         document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
-                                                    document.getElementsByName('text_full')[0])
+                                                    document.getElementsByName('text_full')[0]);
     }
     else {
         container.style.margin = "10px";
@@ -172,11 +315,28 @@ function createSmilePanel() {
                                                     document.getElementsByClassName("b-comment-form")[0]);
     }
     
+    var images = [];
     for(var i = 0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
         if ((/^smile-\d+$/).test(key)) {
             var num = /\d+/.exec(key);
             addCustomSmile(num);
+        } else if ((/^image-.+$/).test(key)) 
+            images.push(key);
+    }
+    
+    if (images.length > 0) {
+        
+        imageContainer.id = "image-container";
+        imageContainer.style.margin = "5px 6px 7px 0px";
+        imageContainer.style.paddingTop = "2px";
+        imageContainer.style.borderTop = "1px dashed #CCCCCC";
+        
+        container.appendChild(imageContainer);
+        
+        for(var i in images) {
+            var name = /^image-(.+)$/.exec(images[i])[1];
+            addCustomImage(localStorage.getItem(images[i]), name);
         }
     }
 }
@@ -323,4 +483,5 @@ if(navigator.appName != "Opera") {
     formTextarea = document.getElementById("comment_form_text");
     createMarkupPanel();
     createSmilePanel();
+    registerAutoupdateHandler();
 }
