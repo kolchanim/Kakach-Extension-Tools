@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.4.2
+// @version 0.4.5
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -16,6 +16,7 @@ if(navigator.appName == "Opera")
         formTextarea = document.getElementById("comment_form_text");
         createMarkupPanel();
         createSmilePanel();
+        registerAutoupdateHandler();
     });
 
 // Replies map
@@ -61,6 +62,42 @@ function createRepliesMap() {
   }
 }
   
+function registerAutoupdateHandler() {
+    document.getElementsByClassName("l-comments-wrap")[0].addEventListener('DOMNodeInserted',
+        function(event) {
+            if(/comment/.test(event.target.id)) {
+                refs = event.target.getElementsByClassName("js-cross-link");
+                for(var j=0; j<refs.length; j++) {
+                    ref = refs[j].name.slice(5);
+                    link = document.createElement("a");
+                    link.className = "js-cross-link";
+                    link.href = document.URL + '#' + event.target.id.slice(8);
+                    link.name = "news/" + event.target.id.slice(8);
+                    link.textContent = ">>" + event.target.id.slice(8);
+                    link.style.fontSize = '1em';
+                    if(container = document.getElementById('answers_'+ref)) { // да, именно =
+                        container = container.lastChild
+                        container.innerHTML += ', ';
+                        container.appendChild(link)
+                    } else {
+                        container = document.createElement("div");
+                        container.id = "answers_" + ref;
+                        container.appendChild(document.createElement('p'));
+                        container = container.lastChild;
+                        container.style.margin = '0px';
+                        container.style.padding = '4px';
+                        container.style.fontSize = '0.8em';
+                        container.textContent = "Ответы: ";
+                        container.appendChild(link)
+                        comment = document.getElementById("comment_" + ref);
+                        if(comment)
+                            comment.appendChild(container.parentNode);
+                    }
+                }
+            }
+        });
+}
+
 // Smile panel
 function addTextToForm(text) {
     cursor_pos = formTextarea.selectionStart;
@@ -323,4 +360,5 @@ if(navigator.appName != "Opera") {
     formTextarea = document.getElementById("comment_form_text");
     createMarkupPanel();
     createSmilePanel();
+    registerAutoupdateHandler();
 }
