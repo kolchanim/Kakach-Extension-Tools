@@ -9,12 +9,13 @@
 
 // Globals
 var formTextarea;
-var deletingSmiles = false;
+var deletingSmiles;
 
 if(navigator.appName == "Opera")
     document.addEventListener('DOMContentLoaded', function() {
         createRepliesMap();
         formTextarea = document.getElementById("comment_form_text");
+        deletingSmiles = false;
         createMarkupPanel();
         createSmilePanel();
         registerAutoupdateHandler();
@@ -485,6 +486,7 @@ function createMarkupPanel() {
 if(navigator.appName != "Opera") {   
     createRepliesMap();
     formTextarea = document.getElementById("comment_form_text");
+    deletingSmiles = false;
     createMarkupPanel();
     createSmilePanel();
     registerAutoupdateHandler();
