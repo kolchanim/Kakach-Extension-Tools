@@ -214,6 +214,8 @@ function removeCustomSmile(id) {
 function removeCustomImage(id) {
     localStorage.removeItem(id);
     document.getElementById("image-container").removeChild(document.getElementById(id));
+    if (document.getElementsByClassName("add-image-button").length === 0) 
+        document.getElementById("image-container").style.display = "none";
 }
 
 function addSmileClick(e) {
