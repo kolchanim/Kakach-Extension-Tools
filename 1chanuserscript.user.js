@@ -261,10 +261,16 @@ function bigBoldClick() {
 
 function bigImgClick() {
   
-    var link = prompt('Ссылка на изображение:');
+    var link = getSelectionText(formTextarea);
+    
+    if (link.length === 0) 
+        link = prompt('Ссылка на изображение:');
+    
+    if (/rghost/.test(link)) {
+        var num = /(\d+)\D*$/.exec(link)[1];
+        link = "http://rghost.ru/" + num + "/image.png";
+    }
   
-    if (!link) 
-        return false;
     addTextToForm('"' + wrapImageLink(link) + '":' + link + '');
 }
 
@@ -281,7 +287,7 @@ function createMarkupPanel() {
     var imgButton = createButton("img", imgClick);
     var quoteButton = createButton(">", quoteClick);
     var bigBoldButton = createButton("BB", bigBoldClick);
-    var bigImgButton = createButton("BigImg", bigImgClick);
+    var bigImgButton = createButton("bimg", bigImgClick);
   
     container.appendChild(imgButton);
     container.appendChild(bigImgButton);
