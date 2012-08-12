@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.5.2
+// @version 0.5.3
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -107,7 +107,8 @@ function addTextToForm(text) {
     formTextarea.value = formText.slice(0, cursor_pos)
                          + text 
                          + formText.slice(formTextarea.selectionEnd);
-    formTextarea.setSelectionRange(cursor_pos + text.length, cursor_pos + text.length);
+    formTextarea.focus();
+    formTextarea.setSelectionRange(cursor_pos, cursor_pos + text.length);
 };
 
 function createSmile(text, imgLink) {
@@ -431,6 +432,9 @@ function bigImgClick() {
     
     if (link.length === 0) 
         link = prompt('Ссылка на изображение:');
+    
+    if (!link) 
+        return false;
     
     if (/rghost/.test(link)) {
         var num = /(\d+)\D*$/.exec(link)[1];
