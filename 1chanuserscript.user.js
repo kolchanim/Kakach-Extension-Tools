@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.5.3
+// @version 0.5.4
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -149,6 +149,8 @@ function createCustomSmile(num) {
 function createCustomImage(link) {
     
     var name = prompt("Имя для картинки:");
+    if (!name)
+        return false;
     var id = "image-" + name;
     
     if (localStorage.getItem(id)) {
