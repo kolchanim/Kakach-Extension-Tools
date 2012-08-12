@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.5.4
+// @version 0.5.5
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/news/*
@@ -289,7 +289,7 @@ function createSmilePanel() {
     addSmileLink.appendChild(addSmileImg);
     addSmileLink.style.cssFloat = "right";
     addSmileLink.style.margin = "5px 5px 5px 5px"
-    addSmileLink.title = "Добавить шмайлик или картинку";
+    addSmileLink.title = "Добавить смайлик или картинку";
     
     var removeSmilesLink  = document.createElement("a");
     var removeSmilesImg = document.createElement("img");
@@ -300,7 +300,7 @@ function createSmilePanel() {
     removeSmilesLink.appendChild(removeSmilesImg);
     removeSmilesLink.style.cssFloat = "right";
     removeSmilesLink.style.margin = "30px -20px 5px 5px"
-    removeSmilesLink.title = "Удалить шмайлики или картинки";
+    removeSmilesLink.title = "Удалить смайлики или картинки";
     
     container.appendChild(addSmileLink);
     container.appendChild(removeSmilesLink);
@@ -425,6 +425,7 @@ function bigBoldClick() {
     } else {
         formTextarea.value += stars;
     }
+    formTextarea.focus();
 }
 
 function bigImgClick() {
@@ -433,10 +434,10 @@ function bigImgClick() {
     
     if (link.length === 0) 
         link = prompt('Ссылка на изображение:');
-    
-    if (!link) 
+    if (!link) {
+        formTextarea.focus();
         return false;
-    
+    }
     if (/rghost/.test(link)) {
         var num = /(\d+)\D*$/.exec(link)[1];
         link = "http://rghost.ru/" + num + "/image.png";
