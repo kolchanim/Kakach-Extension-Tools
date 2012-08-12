@@ -108,7 +108,6 @@ function addTextToForm(text) {
                          + text 
                          + formText.slice(formTextarea.selectionEnd);
     formTextarea.focus();
-    formTextarea.setSelectionRange(cursor_pos, cursor_pos + text.length);
 };
 
 function createSmile(text, imgLink) {
@@ -467,7 +466,9 @@ function createMarkupPanel() {
     for(var k in markup) {
         var newButton = createButton(k, function() {
             var text = getSelectionText(formTextarea);
+            var start = formTextarea.selectionStart + markup[this.value][0].length;
             addTextToForm(wrapText(text, markup[this.value][0]));
+            formTextarea.setSelectionRange(start, start + text.length);
         });
         container.appendChild(newButton);
     }
