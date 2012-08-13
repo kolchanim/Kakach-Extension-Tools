@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.6.0
+// @version 0.6.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -15,8 +15,11 @@ var locationPrefix;
 if(navigator.appName == "Opera")
     document.addEventListener('DOMContentLoaded', function() {
         createRepliesMap();
-        registerAutoupdateHandler();
+        if(!(/\.ru\/news\/add/.test(document.URL)))
+            registerAutoupdateHandler();
         formTextarea = document.getElementById("comment_form_text");
+        if (!formTextarea)
+            formTextarea = document.getElementsByName("text")[0];
         deletingSmiles = false;
         createMarkupPanel();
         createSmilePanel();
@@ -136,7 +139,7 @@ function createSmile(text, imgLink) {
     };
     link.title = text;
     image.src = imgLink;
-    image.style.padding = "5px 3px 2px 3px";
+    image.style.margin = "6px 3px 1px 3px";
     link.style.outline  = "none";
     link.appendChild(image);
     return link;
@@ -147,7 +150,7 @@ function createCustomSmile(num) {
     var id  = "smile-"+num;
     
     if (localStorage.getItem(id)) {
-        alert("Такой шмайлик уже добавлен");
+        alert("Такой смайлик уже добавлен");
         return false;
     }
     addCustomSmile(num)
@@ -273,6 +276,7 @@ function removeSmilesClick(e) {
     return false;
 }
 
+
 function createSmilePanel() {
   
     var container = document.createElement("div");
@@ -295,8 +299,6 @@ function createSmilePanel() {
     addSmileLink.href = "#";
     addSmileLink.onclick = addSmileClick;
     addSmileLink.appendChild(addSmileImg);
-    addSmileLink.style.cssFloat = "right";
-    addSmileLink.style.margin = "5px 5px 5px 5px"
     addSmileLink.title = "Добавить смайлик или картинку";
     
     var removeSmilesLink  = document.createElement("a");
@@ -306,14 +308,20 @@ function createSmilePanel() {
     removeSmilesLink.href = "#";
     removeSmilesLink.onclick = removeSmilesClick;
     removeSmilesLink.appendChild(removeSmilesImg);
-    removeSmilesLink.style.cssFloat = "right";
-    removeSmilesLink.style.margin = "30px -20px 5px 5px"
     removeSmilesLink.title = "Удалить смайлики или картинки";
     
-    container.appendChild(addSmileLink);
-    container.appendChild(removeSmilesLink);
+    var controlsContainer = document.createElement("span");
+    controlsContainer.style.cssFloat = "right";
+    controlsContainer.style.margin = "5px";
     
-    if(!formTextarea) { // news/add
+    controlsContainer.appendChild(addSmileLink);
+    controlsContainer.appendChild(document.createElement("br"));
+    controlsContainer.appendChild(removeSmilesLink);
+    
+    container.appendChild(controlsContainer);
+    container.style.minHeight = "50px";
+    
+    if(/\.ru\/news\/add/.test(document.URL)) { // news/add
         container.style.width = '530px'
         container.style.border = "1px solid #999999";
         container.id = "smile-panel";
@@ -324,36 +332,38 @@ function createSmilePanel() {
         container.style.margin = "10px";
         container.style.paddingLeft = "8px";
         container.style.border = "1px solid #CCCCCC";
-        container.style.borderRadius = "5px 5px 5px 5px"
+        container.style.borderRadius = "5px";
         container.id = "smile-panel";
-        document.getElementById("comment_form").insertBefore(container, 
-                                                    document.getElementsByClassName("b-comment-form")[0]);
+        var formBody = formTextarea.parentNode.parentNode;
+        formBody.parentNode.insertBefore(container, formBody);
     }
     
-    var images = [];
-    for(var i = 0; i < localStorage.length; i++) {
-        var key = localStorage.key(i);
-        if ((/^smile-\d+$/).test(key)) {
-            var num = /\d+/.exec(key);
-            addCustomSmile(num);
-        } else if ((/^image-.+$/).test(key)) 
-            images.push(key);
-    }
-    
-    imageContainer.id = "image-container";
-    imageContainer.style.margin = "5px 6px 7px 0px";
-    imageContainer.style.paddingTop = "2px";
-    imageContainer.style.borderTop = "1px dashed #CCCCCC";
+    if(/\.ru\/news/.test(document.URL)) {
+        var images = [];
+        for(var i = 0; i < localStorage.length; i++) {
+            var key = localStorage.key(i);
+            if ((/^smile-\d+$/).test(key)) {
+                var num = /\d+/.exec(key);
+                addCustomSmile(num);
+            } else if ((/^image-.+$/).test(key)) 
+                images.push(key);
+        }
         
-    container.appendChild(imageContainer);
+        imageContainer.id = "image-container";
+        imageContainer.style.margin = "5px 6px 7px 0px";
+        imageContainer.style.paddingTop = "2px";
+        imageContainer.style.borderTop = "1px dashed #CCCCCC";
+            
+        container.appendChild(imageContainer);
+            
+        for(var i in images) {
+            var name = /^image-(.+)$/.exec(images[i])[1];
+            addCustomImage(localStorage.getItem(images[i]), name);
+        }
         
-    for(var i in images) {
-        var name = /^image-(.+)$/.exec(images[i])[1];
-        addCustomImage(localStorage.getItem(images[i]), name);
-    }
-    
-    if (images.length === 0) {
-        imageContainer.style.display = "none";
+        if (images.length === 0) {
+            imageContainer.style.display = "none";
+        }
     }
 }
 
@@ -422,6 +432,7 @@ function bigBoldClick() {
   
     var text = getSelectionText(formTextarea);
     var lines = text.split("\n");
+    var cursor = formTextarea.selectionEnd;
     const stars = "\n********************************************";
   
     if (text.length > 0) {
@@ -433,7 +444,9 @@ function bigBoldClick() {
     } else {
         formTextarea.value += stars;
     }
+    
     formTextarea.focus();
+    formTextarea.setSelectionRange(cursor, cursor);
 }
 
 function bigImgClick() {
@@ -485,7 +498,7 @@ function createMarkupPanel() {
         container.appendChild(newButton);
     }
     
-    if(!formTextarea) {
+    if(/\.ru\/news\/add/.test(document.URL)) {
         container.style.paddingTop = "4px";
         document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
                                                     document.getElementsByName('text_full')[0])
@@ -495,7 +508,7 @@ function createMarkupPanel() {
             })
     } else {
         container.style.display = "inline-block";
-        document.getElementById("comment_form_text").parentNode.insertBefore(container, 
+        formTextarea.parentNode.insertBefore(container, 
                         document.getElementsByClassName("b-comment-form_b-uplink")[0]);
     }
 }
@@ -503,8 +516,11 @@ function createMarkupPanel() {
 // Main 
 if(navigator.appName != "Opera") {   
     createRepliesMap();
-    registerAutoupdateHandler();
+    if(!(/\.ru\/news\/add/.test(document.URL)))
+        registerAutoupdateHandler();
     formTextarea = document.getElementById("comment_form_text");
+    if (!formTextarea)
+        formTextarea = document.getElementsByName("text")[0];
     deletingSmiles = false;
     createMarkupPanel();
     createSmilePanel();
