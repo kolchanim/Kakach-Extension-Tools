@@ -1,37 +1,40 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.5.6
+// @version 0.6.0
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
-// @include http://1chan.ru/news/*
+// @include http://1chan.ru/*
 // ==/UserScript==
 
 // Globals
 var formTextarea;
 var deletingSmiles;
+var locationPrefix;
 
 if(navigator.appName == "Opera")
     document.addEventListener('DOMContentLoaded', function() {
         createRepliesMap();
+        registerAutoupdateHandler();
         formTextarea = document.getElementById("comment_form_text");
         deletingSmiles = false;
         createMarkupPanel();
         createSmilePanel();
-        registerAutoupdateHandler();
     });
 
 // Replies map
 function createRepliesMap() {
     
+    locationPrefix = /\.ru\/([^/]+)/.exec(document.URL)[1]
     var comments = document.getElementsByClassName("b-comment");
     var table = {};
     
     for(var i=0; i<comments.length; i++) {
-        current_post = comments[i].id.slice(8);
+        current_post = comments[i].id.slice(locationPrefix == 'news' ? 8 : 
+            (locationPrefix.length + 9) );
         refs = comments[i].getElementsByClassName("js-cross-link");
         for(var j=0; j<refs.length; j++) {
-            ref = refs[j].name.slice(5);
+            ref = refs[j].name.slice(locationPrefix.length + 1);
             if(typeof(table[ref]) != 'undefined')
                 table[ref].push(current_post);
             else
@@ -51,14 +54,15 @@ function createRepliesMap() {
             link = document.createElement("a");
             link.className = "js-cross-link";
             link.href = document.URL + '#'+table[post_num][post_ref];
-            link.name = "news/"+table[post_num][post_ref];
+            link.name = locationPrefix + "/" + table[post_num][post_ref];
             link.textContent = ">>"+table[post_num][post_ref];
             link.style.fontSize = '1em';
             container.appendChild(link);
             container.innerHTML += ', ';
         }
         container.innerHTML = container.innerHTML.substring(0, container.innerHTML.length-2);
-        comment = document.getElementById("comment_"+post_num);
+        comment = document.getElementById("comment" + 
+            (locationPrefix == 'news' ? '_' : ('_' + locationPrefix + '_')) + post_num);
         if(comment)
             comment.appendChild(container.parentNode);
   }
@@ -70,12 +74,14 @@ function registerAutoupdateHandler() {
             if(/comment/.test(event.target.id)) {
                 refs = event.target.getElementsByClassName("js-cross-link");
                 for(var j=0; j<refs.length; j++) {
-                    ref = refs[j].name.slice(5);
+                    ref = refs[j].name.slice(locationPrefix.length + 1);
                     link = document.createElement("a");
                     link.className = "js-cross-link";
-                    link.href = document.URL + '#' + event.target.id.slice(8);
-                    link.name = "news/" + event.target.id.slice(8);
-                    link.textContent = ">>" + event.target.id.slice(8);
+                    var current_post = event.target.id.slice(locationPrefix == 'news' ? 8 : 
+                        (locationPrefix.length + 9) );
+                    link.href = document.URL + '#' + current_post;
+                    link.name = locationPrefix + "/" + current_post;
+                    link.textContent = ">>" + current_post;
                     link.style.fontSize = '1em';
                     if(container = document.getElementById('answers_'+ref)) { // да, именно =
                         container = container.lastChild
@@ -91,7 +97,9 @@ function registerAutoupdateHandler() {
                         container.style.fontSize = '0.8em';
                         container.textContent = "Ответы: ";
                         container.appendChild(link)
-                        comment = document.getElementById("comment_" + ref);
+                        comment = document.getElementById("comment" + 
+                        (locationPrefix == 'news' ? '_' : ('_' + locationPrefix + '_')) 
+                        + ref);
                         if(comment)
                             comment.appendChild(container.parentNode);
                     }
@@ -495,9 +503,9 @@ function createMarkupPanel() {
 // Main 
 if(navigator.appName != "Opera") {   
     createRepliesMap();
+    registerAutoupdateHandler();
     formTextarea = document.getElementById("comment_form_text");
     deletingSmiles = false;
     createMarkupPanel();
     createSmilePanel();
-    registerAutoupdateHandler();
 }
