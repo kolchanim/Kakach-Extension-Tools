@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.6.1
+// @version 0.6.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -240,11 +240,15 @@ function addSmileClick(e) {
     if (!link)
         return false;
     
+    if (/(\d+)\D*$/.test(link))
+        var num = /(\d+)\D*$/.exec(link)[1];
+    
     image.src = link;
     image.onerror = function() {
-        var num = /(\d+)\D*$/.exec(link)[1];
-        link = "http://rghost.ru/" + num + "/image.png";
-        image.src = link;
+        if(num) {
+            link = "http://rghost.ru/" + num + "/image.png";
+            image.src = link;
+        }
         image.onerror = function() {
             alert("Ошибка при загрузке картинки");
         }
@@ -256,7 +260,6 @@ function addSmileClick(e) {
             createCustomSmile(num);
         }
     }
-    
     e.preventDefault();
     return false;
 }
