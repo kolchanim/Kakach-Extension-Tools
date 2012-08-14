@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.6.2
+// @version 0.7.0
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -11,10 +11,12 @@
 var formTextarea;
 var deletingSmiles;
 var locationPrefix;
+var hidePatterns;
 
 if(navigator.appName == "Opera")
     document.addEventListener('DOMContentLoaded', function() {
         createRepliesMap();
+        hidePosts();
         if(!(/\.ru\/news\/add/.test(document.URL)))
             registerAutoupdateHandler();
         formTextarea = document.getElementById("comment_form_text");
@@ -75,6 +77,15 @@ function registerAutoupdateHandler() {
     document.getElementsByClassName("l-comments-wrap")[0].addEventListener('DOMNodeInserted',
         function(event) {
             if(/comment/.test(event.target.id)) {
+                // Hiding
+                var match = false;
+                for(var j=0; j<hidePatterns.length; j++)
+                    if(hidePatterns[j].test(event.target.textContent))
+                        match = true;
+                if(match)
+                    event.target.getElementsByClassName('b-comment_b-body')[0].innerHTML = 
+                                                            '<b>Пост скрыт скриптом.</b>';
+                // Answer map
                 refs = event.target.getElementsByClassName("js-cross-link");
                 for(var j=0; j<refs.length; j++) {
                     ref = refs[j].name.slice(locationPrefix.length + 1);
@@ -109,6 +120,23 @@ function registerAutoupdateHandler() {
                 }
             }
         });
+}
+
+function hidePosts() {
+    hidePatterns = [];
+    for(var key in localStorage)
+        if(/hide/.test(key))
+            hidePatterns.push(new RegExp(localStorage[key]));
+    var comments = document.getElementsByClassName('b-comment');
+    for(var i=0; i<comments.length; i++){
+        var match = false;
+        for(var j=0; j<hidePatterns.length; j++)
+            if(hidePatterns[j].test(comments[i].textContent))
+                match = true;
+        if(match)
+            comments[i].getElementsByClassName('b-comment_b-body')[0].innerHTML = 
+                                                                '<b>Пост скрыт скриптом.</b>';
+    }
 }
 
 // Smile panel
@@ -524,6 +552,7 @@ function createMarkupPanel() {
 // Main 
 if(navigator.appName != "Opera") {   
     createRepliesMap();
+    hidePosts();
     if(!(/\.ru\/news\/add/.test(document.URL)))
         registerAutoupdateHandler();
     formTextarea = document.getElementById("comment_form_text");
