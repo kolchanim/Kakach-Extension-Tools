@@ -111,10 +111,6 @@ function registerAutoupdateHandler() {
         });
 }
 
-function hidePosts() {
-    hidePatterns = localStorage.getItem('hidepatterns');
-    
-}
 // Smile panel
 function addTextToForm(text) {
     cursor_pos = formTextarea.selectionStart;
