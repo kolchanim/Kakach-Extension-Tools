@@ -491,10 +491,15 @@ function createMarkupPanel() {
         var newButton = createButton(k, function() {
             var text = getSelectionText(formTextarea);
             var start = formTextarea.selectionStart;
-            text = wrapText(text, markup[this.value][0]);
+            var selection = formTextarea.selectionStart != formTextarea.selectionEnd;
+            var m = markup[this.value][0];
+            text = wrapText(text, m);
             addTextToForm(text);
-            formTextarea.setSelectionRange(start, start + text.length);
-        });
+            if(selection)
+                formTextarea.setSelectionRange(start, start + text.length);
+            else
+                formTextarea.setSelectionRange(start + m.length, start + m.length);
+            });
         container.appendChild(newButton);
     }
     
