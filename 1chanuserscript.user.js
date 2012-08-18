@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.7.0
+// @version 0.7.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -13,21 +13,11 @@ var deletingSmiles;
 var locationPrefix;
 var hidePatterns;
 
-if(navigator.appName == "Opera")
-    document.addEventListener('DOMContentLoaded', function() {
-        createRepliesMap();
-        hidePosts();
-        if(!(/\.ru\/news\/add/.test(document.URL)))
-            registerAutoupdateHandler();
-        formTextarea = document.getElementById("comment_form_text");
-        if (!formTextarea)
-            formTextarea = document.getElementsByName("text")[0];
-        deletingSmiles = false;
-        createMarkupPanel();
-        createSmilePanel();
-    });
+    
+/* 
+ *      Replies map
+ */
 
-// Replies map
 function createRepliesMap() {
     
     locationPrefix = /\.ru\/([^/]+)/.exec(document.URL)[1]
@@ -139,7 +129,11 @@ function hidePosts() {
     }
 }
 
-// Smile panel
+
+/* 
+ *      Smiles Panel
+ */
+
 function addTextToForm(text) {
     cursor_pos = formTextarea.selectionStart;
     var formText = formTextarea.value;
@@ -149,6 +143,13 @@ function addTextToForm(text) {
     formTextarea.focus();
 };
 
+function wrapImageLink(link) {
+    if (/rghost/.test(link)) 
+        return '[:' + /\d+/.exec(link)[0] + ':]';
+    else
+        return '[' + link + ']';
+}
+
 function createSmile(text, imgLink) {
   
     var image = document.createElement("img");
@@ -157,7 +158,7 @@ function createSmile(text, imgLink) {
     link.href = "#";
     link.onclick = function(e) {
         if (deletingSmiles) {
-            removeCustomSmile(this.id);
+            destroyCustomSmile(this.id);
         } else {
             addTextToForm(text);
             formTextarea.focus();
@@ -173,17 +174,7 @@ function createSmile(text, imgLink) {
     return link;
 }
 
-function createCustomSmile(num) {
-
-    var id  = "smile-"+num;
-    
-    if (localStorage.getItem(id)) {
-        alert("Такой смайлик уже добавлен");
-        return false;
-    }
-    addCustomSmile(num)
-    localStorage.setItem(id, "http://rghost.ru/"+num+"/image.png");
-}
+// Custom Images
 
 function createCustomImage(link) {
     
@@ -200,14 +191,64 @@ function createCustomImage(link) {
     localStorage.setItem(id, link);
 }
 
-function addCustomSmile(num) {
+function addCustomImage(link, name) {
     
-    var id  = "smile-"+num;
-    var newSmile = createSmile('[:'+num+':]', "http://rghost.ru/"+num+"/image.png");
+    var id = "image-" + name;
+    var newImage = createButton(name, function(e) {
+        if (deletingSmiles)
+            destroyCustomImage(this.id);
+        else {
+            addTextToForm(wrapImageLink(link));
+            formTextarea.focus();
+        }
+        e.preventDefault();
+        return false;
+    });
+    
+    newImage.onmousedown = function(e) {
+        if (e.which === 2) {
+            destroyCustomImage(this.id);
+        }
+        return false;
+    };
+    
+    newImage.id = id;
+    newImage.setAttribute("class", "add-image-button");
+    
+    var imageContainer = document.getElementById("image-container");
+    imageContainer.appendChild(newImage);
+    imageContainer.style.display = "block";
+}
+
+function destroyCustomImage(id) {
+    localStorage.removeItem(id);
+    document.getElementById("image-container").removeChild(document.getElementById(id));
+    if (document.getElementsByClassName("add-image-button").length === 0) 
+        document.getElementById("image-container").style.display = "none";
+}
+
+// Custom Smiles
+
+function createCustomSmile(link) {
+
+    var id  = "smile-"+link;
+    
+    if (localStorage.getItem(id)) {
+        alert("Такой смайлик уже добавлен");
+        return false;
+    }
+    addCustomSmile(link)
+    localStorage.setItem(id, link);
+}
+
+function addCustomSmile(link) {
+    
+    var id  = "smile-"+link;
+    var newSmile = createSmile(wrapImageLink(link), link);
     
     newSmile.onmousedown = function(e) {
         if (e.which === 2) {
-            removeCustomSmile(this.id);
+            destroyCustomSmile(this.id);
         }
         return false;
     };
@@ -218,46 +259,9 @@ function addCustomSmile(num) {
                                                     document.getElementById("image-container"));
 }
 
-function addCustomImage(link, name) {
-    
-    var id = "image-" + name;
-    var newImage = createButton(name, function(e) {
-        if (deletingSmiles) {
-            removeCustomImage(this.id);
-        } else {
-            if (/rghost/.test(link)) 
-                addTextToForm('[:' + /\d+/.exec(link)[0] + ':]');
-            else 
-                addTextToForm('[' + link + ']');
-            formTextarea.focus();
-        }
-        e.preventDefault();
-        return false;
-    });
-    
-    newImage.onmousedown = function(e) {
-        if (e.which === 2) {
-            removeCustomSmile(this.id);
-        }
-        return false;
-    };
-    
-    newImage.id = id;
-    newImage.setAttribute("class", "add-image-button");
-    document.getElementById("image-container").appendChild(newImage);
-    document.getElementById("image-container").style.display = "block";
-}
-
-function removeCustomSmile(id) {
+function destroyCustomSmile(id) {
     localStorage.removeItem(id);
     document.getElementById("smile-panel").removeChild(document.getElementById(id));
-}
-
-function removeCustomImage(id) {
-    localStorage.removeItem(id);
-    document.getElementById("image-container").removeChild(document.getElementById(id));
-    if (document.getElementsByClassName("add-image-button").length === 0) 
-        document.getElementById("image-container").style.display = "none";
 }
 
 function addSmileClick(e) {
@@ -285,7 +289,7 @@ function addSmileClick(e) {
         if (image.width > 45 || image.heigth > 45) {
             createCustomImage(link);
         } else {
-            createCustomSmile(num);
+            createCustomSmile(link);
         }
     }
     e.preventDefault();
@@ -371,11 +375,10 @@ function createSmilePanel() {
     
     if(/\.ru\/news/.test(document.URL)) {
         var images = [];
-        for(var i = 0; i < localStorage.length; i++) {
-            var key = localStorage.key(i);
-            if ((/^smile-\d+$/).test(key)) {
-                var num = /\d+/.exec(key);
-                addCustomSmile(num);
+        for(var key in localStorage) {
+            if ((/^smile-/).test(key)) {
+                var link = localStorage.getItem(key);
+                addCustomSmile(link);
             } else if ((/^image-.+$/).test(key)) 
                 images.push(key);
         }
@@ -398,7 +401,11 @@ function createSmilePanel() {
     }
 }
 
-// Markup panel
+
+/* 
+ *      Markup Panel
+ */
+
 function getSelectionText(node) {
     var start = node.selectionStart;
     var end = node.selectionEnd;
@@ -549,8 +556,25 @@ function createMarkupPanel() {
     }
 }
 
-// Main 
-if(navigator.appName != "Opera") {   
+
+/* 
+ *      Main
+ */
+
+if(navigator.appName == "Opera")
+    document.addEventListener('DOMContentLoaded', function() {
+        createRepliesMap();
+        hidePosts();
+        if(!(/\.ru\/news\/add/.test(document.URL)))
+            registerAutoupdateHandler();
+        formTextarea = document.getElementById("comment_form_text");
+        if (!formTextarea)
+            formTextarea = document.getElementsByName("text")[0];
+        deletingSmiles = false;
+        createMarkupPanel();
+        createSmilePanel();
+    });
+else {
     createRepliesMap();
     hidePosts();
     if(!(/\.ru\/news\/add/.test(document.URL)))
