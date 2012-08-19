@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.7.5
+// @version 0.7.6
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
-// @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
+// @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
 // ==/UserScript==
 
