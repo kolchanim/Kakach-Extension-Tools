@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.7.1
+// @version 0.7.5
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/postmanlololol/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -555,7 +555,14 @@ function createMarkupPanel() {
                         document.getElementsByClassName("b-comment-form_b-uplink")[0]);
     }
 }
-
+/*
+ *      Spoilers
+ */
+function revealSpoilers() {
+    var spoilers = document.getElementByClassName('b-spoiler-text')
+    for(var i = 0; i<spoilers.length; i++)
+        spoilers[i].setAttribute('style', 'color:#40454B !important')
+}
 
 /* 
  *      Main
@@ -573,6 +580,7 @@ if(navigator.appName == "Opera")
         deletingSmiles = false;
         createMarkupPanel();
         createSmilePanel();
+        revealSpoilers();
     });
 else {
     createRepliesMap();
@@ -585,4 +593,5 @@ else {
     deletingSmiles = false;
     createMarkupPanel();
     createSmilePanel();
+    revealSpoilers();
 }
