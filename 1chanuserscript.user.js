@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.7.6
+// @version 0.7.7
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -559,7 +559,7 @@ function createMarkupPanel() {
  *      Spoilers
  */
 function revealSpoilers() {
-    var spoilers = document.getElementByClassName('b-spoiler-text')
+    var spoilers = document.getElementsByClassName('b-spoiler-text')
     for(var i = 0; i<spoilers.length; i++)
         spoilers[i].setAttribute('style', 'color:#40454B !important')
 }
