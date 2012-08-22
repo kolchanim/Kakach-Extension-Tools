@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.7.7
+// @version 0.7.8
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -375,7 +375,8 @@ function createSmilePanel() {
     
     if(/\.ru\/news/.test(document.URL)) {
         var images = [];
-        for(var key in localStorage) {
+        for(var i = 0; i < localStorage.length; i++) {
+            var key = localStorage.key(i);
             if ((/^smile-/).test(key)) {
                 var link = localStorage.getItem(key);
                 addCustomSmile(link);
@@ -555,9 +556,12 @@ function createMarkupPanel() {
                         document.getElementsByClassName("b-comment-form_b-uplink")[0]);
     }
 }
+
+
 /*
  *      Spoilers
  */
+ 
 function revealSpoilers() {
     var spoilers = document.getElementsByClassName('b-spoiler-text')
     for(var i = 0; i<spoilers.length; i++)
