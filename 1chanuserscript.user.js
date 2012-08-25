@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.7.8
+// @version 0.7.9
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -493,12 +493,12 @@ function bigImgClick() {
     var link = getSelectionText(formTextarea);
     
     if (link.length === 0) 
-        link = prompt('Ссылка на изображение:');
+        link = prompt('Ссылка на изображение или номер файла на ргхосте:');
     if (!link) {
         formTextarea.focus();
         return false;
     }
-    if (/rghost/.test(link)) {
+    if (/rghost|^[^\/]*\d+[^\/]*$/.test(link)) {
         var num = /(\d+)\D*$/.exec(link)[1];
         link = "http://rghost.ru/" + num + "/image.png";
     }
