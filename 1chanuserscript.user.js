@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 0.7.9
+// @version 1.0.0
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -12,8 +12,11 @@ var formTextarea;
 var deletingSmiles;
 var locationPrefix;
 var hidePatterns;
-
-    
+var features = ['answermap', 'hiding', 'smiles', 'markup', 'spoliers']
+var descriptions = ['Построение карты ответов', 'Скрытие постов', 'Панель смайлов',
+                    'Панель разметки', 'Раскрытие спойлеров']
+var enabledFeatures;
+var VERSION = '100';
 /* 
  *      Replies map
  */
@@ -64,18 +67,23 @@ function createRepliesMap() {
 }
   
 function registerAutoupdateHandler() {
+    if(/\.ru\/news\/add/.test(document.URL))
+        return;
     document.getElementsByClassName("l-comments-wrap")[0].addEventListener('DOMNodeInserted',
         function(event) {
             if(/comment/.test(event.target.id)) {
                 // Hiding
-                var match = false;
-                for(var j=0; j<hidePatterns.length; j++)
-                    if(hidePatterns[j].test(event.target.textContent))
-                        match = true;
-                if(match)
-                    event.target.getElementsByClassName('b-comment_b-body')[0].innerHTML = 
+                if(enabledFeatures.indexOf("hiding")!= -1) {
+                    var match = false;
+                    for(var j=0; j<hidePatterns.length; j++)
+                        if(hidePatterns[j].test(event.target.textContent))
+                            match = true;
+                    if(match)
+                        event.target.getElementsByClassName('b-comment_b-body')[0].innerHTML = 
                                                             '<b>Пост скрыт скриптом.</b>';
+                }
                 // Answer map
+                if(enabledFeatures.indexOf("answermap")!= -1){
                 refs = event.target.getElementsByClassName("js-cross-link");
                 for(var j=0; j<refs.length; j++) {
                     ref = refs[j].name.slice(locationPrefix.length + 1);
@@ -108,15 +116,20 @@ function registerAutoupdateHandler() {
                             comment.appendChild(container.parentNode);
                     }
                 }
+                }
             }
         });
 }
 
+/*
+ *      Hiding
+ */ 
+
 function hidePosts() {
     hidePatterns = [];
     for(var key in localStorage)
-        if(/hide/.test(key))
-            hidePatterns.push(new RegExp(localStorage[key]));
+        if(/hidephrase/.test(key))
+            hidePatterns.push(new RegExp(localStorage[key],"i"));
     var comments = document.getElementsByClassName('b-comment');
     for(var i=0; i<comments.length; i++){
         var match = false;
@@ -568,34 +581,159 @@ function revealSpoilers() {
         spoilers[i].setAttribute('style', 'color:#40454B !important')
 }
 
+/*
+ *      Menu
+ */
+ 
+function createMenu() {
+    var container = document.getElementsByClassName("b-menu-panel_b-links")[0]
+    var general = document.createElement("a")
+    general.href = "#"
+    general.textContent = "Настройки скрипта"
+    general.onclick = displayGeneralOptions;
+    container.appendChild(general)
+    container.appendChild(document.createElement("br"))
+    var hidelist = document.createElement("a")
+    hidelist.href = "#"
+    hidelist.onclick = displayHideList;
+    hidelist.textContent = "Список скрываемых выражений"
+    container.appendChild(hidelist)
+}
+
+function displayGeneralOptions() {
+    var container = document.createElement("div");
+    container.id = 'scriptsettings'
+    container.setAttribute("style", 'top: 5px; left:5px; position:fixed; \
+    z-index: 10000; background: #EAF4FF; padding: 5px');
+    for(var i = 0; i < features.length; i++) {
+        var desc = document.createElement('p');
+        desc.textContent = descriptions[i];
+        desc.style.display = 'inline';
+        desc.style.fontSize = '0.75em'
+        var box = document.createElement('input');
+        box.type = 'checkbox';
+        box.className = 'opt';
+        box.id = features[i];
+        container.appendChild(box);
+        container.appendChild(desc);
+        container.appendChild(document.createElement('br'));
+    }
+    btn = document.createElement("button");
+    btn.textContent = "Сохранить";
+    btn.href = "#";
+    btn.onclick = saveGeneralOptions;
+    container.appendChild(btn);
+    document.getElementsByTagName("body")[0].appendChild(container)
+    for(var i = 0; i<enabledFeatures.length; i++)
+        if(enabledFeatures[i] != '')
+                document.getElementById(enabledFeatures[i]).checked = true;
+    return false
+}
+
+function saveGeneralOptions() {
+    enabledFeatures = [];
+    var boxes = document.getElementsByClassName('opt');
+    for(var i = 0; i<boxes.length; i++)
+        if(boxes[i].checked)
+            enabledFeatures.push(boxes[i].id);
+    var str = '';
+    for(var i = 0; i < enabledFeatures.length; i++)
+        str += enabledFeatures[i] + ' ';
+    localStorage['settings' + VERSION] = str;
+    cont = document.getElementById('scriptsettings');
+    cont.parentNode.removeChild(cont)
+}
+
+function displayHideList() {
+    var container = document.createElement("div")
+    container.setAttribute("style", "top: 5px; left:5px; position:fixed; \
+    z-index: 10000; background: #EAF4FF; border: 1px black")
+    var list = document.createElement("textarea")
+    list.id = "regexps"
+    list.setAttribute("style", "width: 300px; height: 300px; margin:5px")
+    for(var key in localStorage)
+        if(/hidephrase/.test(key))
+            list.value += localStorage[key] + '\n'
+    var button = document.createElement("button")
+    button.textContent = "Сохранить"
+    button.onclick = updateRegexps;
+    button.style.margin = "5px"
+    container.appendChild(list)
+    container.appendChild(document.createElement("br"))
+    container.appendChild(button)
+    document.getElementsByTagName("body")[0].appendChild(container)
+    return false
+}
+
+function updateRegexps() {
+    for(var key in localStorage)
+        if(/hidephrase/.test(key))
+            localStorage.removeItem(key);
+    regexps = document.getElementById('regexps').value.split('\n');
+    for(var i = 0; i < regexps.length; i++) {
+        if(regexps[i] != "") {
+            localStorage.setItem("hidephrase" + i, regexps[i]);
+        }
+    }
+    menu = document.getElementById('regexps').parentNode;
+    menu.parentNode.removeChild(menu);
+}
 /* 
  *      Main
  */
 
 if(navigator.appName == "Opera")
     document.addEventListener('DOMContentLoaded', function() {
-        createRepliesMap();
-        hidePosts();
-        if(!(/\.ru\/news\/add/.test(document.URL)))
-            registerAutoupdateHandler();
+        try {
+            enabledFeatures = localStorage['settings' + VERSION].split(' ');
+        } catch(keyerror) {
+            enabledFeatures = features;
+            var str = '';
+            for(var i = 0; i < features.length; i++ )
+                str += features[i] + ' ';
+            localStorage['settings' + VERSION] = str;
+        }
+        createMenu();
+        if(enabledFeatures.indexOf("answermap")!= -1)
+            createRepliesMap();
+        if(enabledFeatures.indexOf("hiding")!= -1)
+            hidePosts();
+        registerAutoupdateHandler();
         formTextarea = document.getElementById("comment_form_text");
         if (!formTextarea)
             formTextarea = document.getElementsByName("text")[0];
         deletingSmiles = false;
-        createMarkupPanel();
-        createSmilePanel();
-        revealSpoilers();
+        if(enabledFeatures.indexOf("markup")!= -1)
+            createMarkupPanel();
+        if(enabledFeatures.indexOf("smiles")!= -1)
+            createSmilePanel();
+        if(enabledFeatures.indexOf("spoilers")!= -1)
+            revealSpoilers();
     });
 else {
-    createRepliesMap();
-    hidePosts();
-    if(!(/\.ru\/news\/add/.test(document.URL)))
-        registerAutoupdateHandler();
+    try {
+        enabledFeatures = localStorage['settings' + VERSION].split(' ');
+    } catch(keyerror) {
+        enabledFeatures = features;
+        var str = '';
+        for(var i = 0; i < features.length; i++ )
+            str += features[i] + ' ';
+        localStorage['settings' + VERSION] = str;
+    }
+    createMenu();
+    if(enabledFeatures.indexOf("answermap")!= -1)
+        createRepliesMap();
+    if(enabledFeatures.indexOf("hiding")!= -1)
+        hidePosts();
+    registerAutoupdateHandler();
     formTextarea = document.getElementById("comment_form_text");
     if (!formTextarea)
         formTextarea = document.getElementsByName("text")[0];
     deletingSmiles = false;
-    createMarkupPanel();
-    createSmilePanel();
-    revealSpoilers();
+    if(enabledFeatures.indexOf("markup")!= -1)
+        createMarkupPanel();
+    if(enabledFeatures.indexOf("smiles")!= -1)
+        createSmilePanel();
+    if(enabledFeatures.indexOf("spoilers")!= -1)
+        revealSpoilers();
 }
