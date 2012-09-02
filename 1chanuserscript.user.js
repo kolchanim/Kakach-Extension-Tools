@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.1.0
+// @version 1.1.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -511,19 +511,19 @@ function initSmilePanelHiding() {
     smilePanel.parentNode.insertBefore(hideContainer, smilePanel);
     smilePanel.parentNode.insertBefore(showContainer, smilePanel);
         
-    if(localStorage.getItem("smile-panel") == "hidden") 
+    if(localStorage.getItem("smile_panel") == "hidden") 
         hideSmilePanel();
 }
 
 function hideSmilePanel() {
-    localStorage.setItem("smile-panel", "hidden");
+    localStorage.setItem("smile_panel", "hidden");
     document.getElementById("smile-panel").style.display = "none";
     document.getElementById("show-panel-button").style.display = "block";
     document.getElementById("hide-panel-button").style.display = "none";
 }
 
 function showSmilePanel() {
-    localStorage.setItem("smile-panel", "visible");
+    localStorage.setItem("smile_panel", "visible");
     document.getElementById("smile-panel").style.display = "block";
     document.getElementById("show-panel-button").style.display = "none";
     document.getElementById("hide-panel-button").style.display = "block";
