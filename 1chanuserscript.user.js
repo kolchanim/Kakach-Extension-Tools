@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.0.0
+// @version 1.1.0
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
+// @grant       none
 // ==/UserScript==
 
 // Globals
@@ -12,11 +13,15 @@ var formTextarea;
 var deletingSmiles;
 var locationPrefix;
 var hidePatterns;
-var features = ['answermap', 'hiding', 'smiles', 'markup', 'spoliers']
+var features = ['answermap', 'hiding', 'smiles', 'markup', 'spoliers', 'show-hidden', 'form-settings',
+                'panel-hiding', 'markup-top'];
 var descriptions = ['Построение карты ответов', 'Скрытие постов', 'Панель смайлов',
-                    'Панель разметки', 'Раскрытие спойлеров']
+                    'Панель разметки', 'Раскрытие спойлеров', 'Показывать скрытые комментарии',
+                    'Настройки рядом с формой', 'Убирать панель по клику', 'Разметка над формой'];
 var enabledFeatures;
 var VERSION = '100';
+
+
 /* 
  *      Replies map
  */
@@ -76,11 +81,17 @@ function registerAutoupdateHandler() {
                 if(enabledFeatures.indexOf("hiding")!= -1) {
                     var match = false;
                     for(var j=0; j<hidePatterns.length; j++)
-                        if(hidePatterns[j].test(event.target.textContent))
-                            match = true;
-                    if(match)
-                        event.target.getElementsByClassName('b-comment_b-body')[0].innerHTML = 
-                                                            '<b>Пост скрыт скриптом.</b>';
+                        if(hidePatterns[j].test(event.target.textContent)) {
+                            hidePost(event.target);
+                            break;
+                        }
+                    var hideButton = event.target.getElementsByClassName('b-comment_b-info')[0]
+                                     .getElementsByClassName('js-remove-button')[0];
+                    hideButton.style.display = "inline-block";
+                    hideButton.onclick = function() {
+                        hidePost(this.parentNode.parentNode);
+                        return false;
+                    };
                 }
                 // Answer map
                 if(enabledFeatures.indexOf("answermap")!= -1){
@@ -121,25 +132,63 @@ function registerAutoupdateHandler() {
         });
 }
 
+
 /*
  *      Hiding
  */ 
 
 function hidePosts() {
     hidePatterns = [];
-    for(var key in localStorage)
+    var hiddenComments = [];
+    for(var key in localStorage) 
         if(/hidephrase/.test(key))
             hidePatterns.push(new RegExp(localStorage[key],"i"));
-    var comments = document.getElementsByClassName('b-comment');
-    for(var i=0; i<comments.length; i++){
-        var match = false;
-        for(var j=0; j<hidePatterns.length; j++)
-            if(hidePatterns[j].test(comments[i].textContent))
-                match = true;
-        if(match)
-            comments[i].getElementsByClassName('b-comment_b-body')[0].innerHTML = 
-                                                                '<b>Пост скрыт скриптом.</b>';
+        else if(/comment_\d+/.test(key))
+            hiddenComments.push(key);
+    
+    var hideButtons = document.getElementsByClassName('js-remove-button');
+    for(var i=0; i < hideButtons.length; i++) {
+        hideButtons[i].onclick = function() {
+            hidePost(this.parentNode.parentNode);
+            return false;
+        }
+        hideButtons[i].style.display = "inline-block";
     }
+    
+    var comments = document.getElementsByClassName('b-comment');
+    for(var i=0; i < comments.length; i++){
+        for(var j=0; j<hidePatterns.length; j++)
+            if(hidePatterns[j].test(comments[i].textContent) || hiddenComments.indexOf(comments[i].id)!= -1) {
+                hidePost(comments[i]);
+                break;
+            }
+    }
+}
+
+function hidePost(node) {
+    if(enabledFeatures.indexOf("show-hidden")!= -1) {
+        node.getElementsByClassName('b-comment_b-body')[0].style.display = "none";
+        var button = node.getElementsByClassName('b-comment_b-info')[0].getElementsByClassName('js-remove-button')[0];
+        button.onclick = function() {
+            showPost(node);
+            return false;
+        }
+        button.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/delete.gif");
+    } else {
+        node.style.display = "none";
+    }
+    localStorage.setItem(node.id, node.id);
+}
+
+function showPost(node) {
+    node.getElementsByClassName('b-comment_b-body')[0].style.display = "block";
+    var button = node.getElementsByClassName('b-comment_b-info')[0].getElementsByClassName('js-remove-button')[0];
+     button.onclick = function() {
+        hidePost(node);
+        return false;
+    }
+    button.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/remove.gif");
+    localStorage.removeItem(node.id);
 }
 
 
@@ -413,6 +462,71 @@ function createSmilePanel() {
             imageContainer.style.display = "none";
         }
     }
+    
+    if(enabledFeatures.indexOf("panel-hiding")!= -1)
+        initSmilePanelHiding()
+}
+
+function initSmilePanelHiding() {
+    
+    var smilePanel = document.getElementById("smile-panel");
+    var showButton = document.createElement("a");
+    var showContainer = document.createElement("div");
+    var hideButton = document.createElement("a");
+    var hideContainer = document.createElement("div");
+        
+    showButton.onclick = function() {
+        showSmilePanel();
+        return false;
+    };
+    showButton.textContent = "Cмайлики и картинки";
+    showButton.style.borderBottom = "1px dashed #3366CC";
+    showButton.style.textDecoration = "none";
+    showButton.href = "#";
+    showContainer.appendChild(showButton);
+    showContainer.style.display = "none";
+    showContainer.style.fontSize = "0.65em";
+    showContainer.id = "show-panel-button";
+    
+    hideButton.onclick = function() {
+        hideSmilePanel();
+        return false;
+    };
+    hideButton.textContent = "Спрятать панель";
+    hideButton.style.borderBottom = "1px dashed #3366CC";
+    hideButton.style.textDecoration = "none";
+    hideButton.href = "#";
+    hideContainer.appendChild(hideButton);
+    hideContainer.style.fontSize = "0.65em";
+    hideContainer.id = "hide-panel-button";
+    
+    if(/\.ru\/news\/add/.test(document.URL)) {
+        hideContainer.style.margin = "3px 0px 4px 220px";
+        showContainer.style.margin = "3px 0px 4px 210px";
+    } else {
+        hideContainer.style.margin = "3px 0px -3px 240px";
+        showContainer.style.margin = "3px 0px -3px 230px";
+    }
+        
+    smilePanel.parentNode.insertBefore(hideContainer, smilePanel);
+    smilePanel.parentNode.insertBefore(showContainer, smilePanel);
+        
+    if(localStorage.getItem("smile-panel") == "hidden") 
+        hideSmilePanel();
+}
+
+function hideSmilePanel() {
+    localStorage.setItem("smile-panel", "hidden");
+    document.getElementById("smile-panel").style.display = "none";
+    document.getElementById("show-panel-button").style.display = "block";
+    document.getElementById("hide-panel-button").style.display = "none";
+}
+
+function showSmilePanel() {
+    localStorage.setItem("smile-panel", "visible");
+    document.getElementById("smile-panel").style.display = "block";
+    document.getElementById("show-panel-button").style.display = "none";
+    document.getElementById("hide-panel-button").style.display = "block";
 }
 
 
@@ -564,9 +678,15 @@ function createMarkupPanel() {
                 formTextarea = event.target // Смена полей в news/add
             })
     } else {
-        container.style.display = "inline-block";
-        formTextarea.parentNode.insertBefore(container, 
-                        document.getElementsByClassName("b-comment-form_b-uplink")[0]);
+        if(enabledFeatures.indexOf("markup-top") == -1) {
+            container.style.display = "inline-block";
+            formTextarea.parentNode.insertBefore(container, 
+                            document.getElementsByClassName("b-comment-form_b-uplink")[0]);
+        } else {
+            container.style.marginTop = "3px";
+            formTextarea.style.margin = "3px 0px 6px"
+            formTextarea.parentNode.insertBefore(container, formTextarea);
+        }
     }
 }
 
@@ -581,27 +701,64 @@ function revealSpoilers() {
         spoilers[i].setAttribute('style', 'color:#40454B !important')
 }
 
+
 /*
  *      Menu
  */
  
 function createMenu() {
-    var container = document.getElementsByClassName("b-menu-panel_b-links")[0]
-    var general = document.createElement("a")
-    general.href = "#"
-    general.textContent = "Настройки скрипта"
+    
+    var general = document.createElement("a");
+    var hidelist = document.createElement("a");
+    
+    general.href = "#";
     general.onclick = displayGeneralOptions;
-    container.appendChild(general)
-    container.appendChild(document.createElement("br"))
-    var hidelist = document.createElement("a")
-    hidelist.href = "#"
+    general.id = "general-settings-button";
+    hidelist.href = "#";
     hidelist.onclick = displayHideList;
-    hidelist.textContent = "Список скрываемых выражений"
-    container.appendChild(hidelist)
+    hidelist.id = "hiding-list-button";
+    if(enabledFeatures.indexOf('form-settings')!= -1) {
+        var generalIcon = document.createElement("img");
+        generalIcon.src = "http://cdn1.iconfinder.com/data/icons/munich/16x16/settings.png";
+        general.appendChild(generalIcon);
+        var regexpIcon = document.createElement("img");
+        regexpIcon.src = "http://vll.java.net/images/GrammarIconRegex.gif";
+        hidelist.appendChild(regexpIcon);
+        var container = formTextarea.parentNode.parentNode.getElementsByTagName("div")[0];
+        hidelist.style.cssFloat = "right";
+        general.style.cssFloat = "right";
+        general.style.margin = "0px 10px 0px 2px";
+        general.title = "Настройки скрипта";
+        hidelist.title = "Список скрываемых выражений";
+        container.parentNode.insertBefore(general, container);
+        container.parentNode.insertBefore(hidelist, container);
+    } else {
+        var container = document.getElementsByClassName("b-menu-panel_b-links")[0];
+        general.textContent = "Настройки скрипта";
+        hidelist.textContent = "Список скрываемых выражений";
+        container.appendChild(general);
+        container.appendChild(document.createElement("br"));
+        container.appendChild(hidelist);
+    }
+}
+
+function hideGeneralOption() {
+    var cont = document.getElementById('scriptsettings');
+    cont.parentNode.removeChild(cont);
+    document.getElementById('general-settings-button').onclick = displayGeneralOptions;
+    return false;
+}
+
+function hideHideList() {
+    var menu = document.getElementById('regexps').parentNode;
+    menu.parentNode.removeChild(menu);
+    document.getElementById('hiding-list-button').onclick = displayHideList;
+    return false;
 }
 
 function displayGeneralOptions() {
     var container = document.createElement("div");
+    document.getElementById('general-settings-button').onclick = hideGeneralOption;
     container.id = 'scriptsettings'
     container.setAttribute("style", 'top: 5px; left:5px; position:fixed; \
     z-index: 10000; background: #EAF4FF; padding: 5px');
@@ -627,10 +784,11 @@ function displayGeneralOptions() {
     for(var i = 0; i<enabledFeatures.length; i++)
         if(enabledFeatures[i] != '')
                 document.getElementById(enabledFeatures[i]).checked = true;
-    return false
+    return false;
 }
 
 function saveGeneralOptions() {
+    document.getElementById('general-settings-button').onclick = displayGeneralOptions;
     enabledFeatures = [];
     var boxes = document.getElementsByClassName('opt');
     for(var i = 0; i<boxes.length; i++)
@@ -646,6 +804,7 @@ function saveGeneralOptions() {
 
 function displayHideList() {
     var container = document.createElement("div")
+    document.getElementById('hiding-list-button').onclick = hideHideList;
     container.setAttribute("style", "top: 5px; left:5px; position:fixed; \
     z-index: 10000; background: #EAF4FF; border: 1px black")
     var list = document.createElement("textarea")
@@ -662,10 +821,11 @@ function displayHideList() {
     container.appendChild(document.createElement("br"))
     container.appendChild(button)
     document.getElementsByTagName("body")[0].appendChild(container)
-    return false
+    return false;
 }
 
 function updateRegexps() {
+    document.getElementById('hiding-list-button').onclick = displayHideList;
     for(var key in localStorage)
         if(/hidephrase/.test(key))
             localStorage.removeItem(key);
@@ -678,39 +838,13 @@ function updateRegexps() {
     menu = document.getElementById('regexps').parentNode;
     menu.parentNode.removeChild(menu);
 }
+
+
 /* 
  *      Main
  */
 
-if(navigator.appName == "Opera")
-    document.addEventListener('DOMContentLoaded', function() {
-        try {
-            enabledFeatures = localStorage['settings' + VERSION].split(' ');
-        } catch(keyerror) {
-            enabledFeatures = features;
-            var str = '';
-            for(var i = 0; i < features.length; i++ )
-                str += features[i] + ' ';
-            localStorage['settings' + VERSION] = str;
-        }
-        createMenu();
-        if(enabledFeatures.indexOf("answermap")!= -1)
-            createRepliesMap();
-        if(enabledFeatures.indexOf("hiding")!= -1)
-            hidePosts();
-        registerAutoupdateHandler();
-        formTextarea = document.getElementById("comment_form_text");
-        if (!formTextarea)
-            formTextarea = document.getElementsByName("text")[0];
-        deletingSmiles = false;
-        if(enabledFeatures.indexOf("markup")!= -1)
-            createMarkupPanel();
-        if(enabledFeatures.indexOf("smiles")!= -1)
-            createSmilePanel();
-        if(enabledFeatures.indexOf("spoilers")!= -1)
-            revealSpoilers();
-    });
-else {
+function letTheSobakOut() {
     try {
         enabledFeatures = localStorage['settings' + VERSION].split(' ');
     } catch(keyerror) {
@@ -720,15 +854,15 @@ else {
             str += features[i] + ' ';
         localStorage['settings' + VERSION] = str;
     }
+    formTextarea = document.getElementById("comment_form_text");
+    if (!formTextarea)
+        formTextarea = document.getElementsByName("text")[0];
     createMenu();
     if(enabledFeatures.indexOf("answermap")!= -1)
         createRepliesMap();
     if(enabledFeatures.indexOf("hiding")!= -1)
         hidePosts();
     registerAutoupdateHandler();
-    formTextarea = document.getElementById("comment_form_text");
-    if (!formTextarea)
-        formTextarea = document.getElementsByName("text")[0];
     deletingSmiles = false;
     if(enabledFeatures.indexOf("markup")!= -1)
         createMarkupPanel();
@@ -736,4 +870,11 @@ else {
         createSmilePanel();
     if(enabledFeatures.indexOf("spoilers")!= -1)
         revealSpoilers();
+    
+}
+
+if(navigator.appName == "Opera")
+    document.addEventListener('DOMContentLoaded', letTheSobakOut);
+else {
+    letTheSobakOut();
 }
