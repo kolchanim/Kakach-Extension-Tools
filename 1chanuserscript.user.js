@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.1.1
+// @version 1.1.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -87,6 +87,7 @@ function registerAutoupdateHandler() {
                         }
                     var hideButton = event.target.getElementsByClassName('b-comment_b-info')[0]
                                      .getElementsByClassName('js-remove-button')[0];
+                    hideButton.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/oh-my-eyes.png");
                     hideButton.style.display = "inline-block";
                     hideButton.onclick = function() {
                         hidePost(this.parentNode.parentNode);
@@ -148,6 +149,7 @@ function hidePosts() {
     
     var hideButtons = document.getElementsByClassName('js-remove-button');
     for(var i=0; i < hideButtons.length; i++) {
+        hideButtons[i].getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/oh-my-eyes.png");
         hideButtons[i].onclick = function() {
             hidePost(this.parentNode.parentNode);
             return false;
@@ -173,7 +175,7 @@ function hidePost(node) {
             showPost(node);
             return false;
         }
-        button.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/delete.gif");
+        button.getElementsByTagName('img')[0].setAttribute("src", "http://img440.imageshack.us/img440/162/ohmyeyes1.png");
     } else {
         node.style.display = "none";
     }
@@ -187,7 +189,7 @@ function showPost(node) {
         hidePost(node);
         return false;
     }
-    button.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/remove.gif");
+    button.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/oh-my-eyes.png");
     localStorage.removeItem(node.id);
 }
 
@@ -575,7 +577,8 @@ function imgClick() {
 
 function quoteClick() {
   
-    var text = getSelectionText(formTextarea);
+    var text  = getSelectionText(formTextarea);
+    var start = formTextarea.selectionStart;
   
     if (text.length > 0) {
         var formText = formTextarea.value;
@@ -584,6 +587,8 @@ function quoteClick() {
             lines[i] = ">>" + lines[i].trim() + "<<";
         }
         addTextToForm(lines.join("\n"));
+        if(lines.length == 1)
+            formTextarea.setSelectionRange(start + 2, start + text.length + 2);
     } else {
         text = document.getSelection().toString();
         var lines = text.split("\n");
@@ -599,6 +604,7 @@ function bigBoldClick() {
     var text = getSelectionText(formTextarea);
     var lines = text.split("\n");
     var cursor = formTextarea.selectionEnd;
+    var start = formTextarea.selectionStart;
     const stars = "\n********************************************";
   
     if (text.length > 0) {
@@ -606,13 +612,16 @@ function bigBoldClick() {
             if (lines[i] !== "") 
                 lines[i] += stars;
         }
-        addTextToForm(lines.join("\n")); 
+        addTextToForm(lines.join("\n"));
     } else {
         formTextarea.value += stars;
     }
     
     formTextarea.focus();
-    formTextarea.setSelectionRange(cursor, cursor);
+    if(lines.length == 1 && text.length > 0)
+        formTextarea.setSelectionRange(start, start + text.length);
+    else
+        formTextarea.setSelectionRange(cursor, cursor);
 }
 
 function bigImgClick() {
