@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.2.0
+// @version 1.2.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -915,7 +915,6 @@
         if (!formTextarea)
             formTextarea = document.getElementsByName("text")[0];
         if (formTextarea) {
-            createMenu();
             if(enabledFeatures.indexOf("answermap")!= -1)
                 createRepliesMap();
             if(enabledFeatures.indexOf("hiding")!= -1)
@@ -931,7 +930,7 @@
                 hideThreads();
         if(enabledFeatures.indexOf("spoilers")!= -1)
             revealSpoilers();
-        
+        createMenu();
     }
 
     if(navigator.appName == "Opera")
