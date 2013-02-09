@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.2.1
+// @version 1.2.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -178,8 +178,9 @@
         var threads = document.getElementsByClassName('b-blog-entry');
         for(var i=0; i < threads.length; i++) {
             var threadOpPost = threads[i].getElementsByClassName('b-blog-entry_b-body')[0];
+            var threadTitle = threads[i].getElementsByClassName('b-blog-entry_b-header')[0];
             for(var j=0; j < hidePatterns.length; j++)
-                if(hidePatterns[j].test(threadOpPost.textContent)) {
+                if(hidePatterns[j].test(threadOpPost.textContent) || hidePatterns[j].test(threadTitle.textContent)) {
                     hideThread(threads[i]);
                     break;
                 }
@@ -700,10 +701,10 @@
         
         var buttons = {
             "img": imgClick,
-            ">": quoteClick,
-            "BB": bigBoldClick,
             "bimg": bigImgClick,
-            "S": strikeThroughClick
+            ">": quoteClick,
+            "S": strikeThroughClick,
+            "BB": bigBoldClick,
         };
         
         for (var k in buttons)
@@ -931,6 +932,7 @@
         if(enabledFeatures.indexOf("spoilers")!= -1)
             revealSpoilers();
         createMenu();
+        
     }
 
     if(navigator.appName == "Opera")
