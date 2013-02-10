@@ -816,6 +816,8 @@
    {
       if(arr.length == 0)
          return null;
+      else if(arr.length == 1)
+         return arr[0];
       else
          return arr[Math.floor(Math.random() * arr.length)];
    }
@@ -842,7 +844,7 @@
             to = from;
 
          if(is_upper)
-            to = to.toUpperCase();
+            to = to[0].toUpperCase() + to.slice(1);
 
          result += to;
       }
