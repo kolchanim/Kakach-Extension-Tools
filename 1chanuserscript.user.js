@@ -687,7 +687,17 @@
     
     function mListClick() {
     }
+    
+   function yobaClick()
+   {
+      var selected_text = getSelectionText(formTextarea);
+      var has_selected = selected_text.length != 0;
 
+      if(has_selected)
+         addTextToForm(yobaTranslate(selected_text));
+      else
+         formTextarea.value = yobaTranslate(formTextarea.value)
+   }
 
     function createMarkupPanel() {
       
@@ -705,6 +715,7 @@
             ">": quoteClick,
             "S": strikeThroughClick,
             "BB": bigBoldClick,
+            "Y": yobaClick
         };
         
         for (var k in buttons)
@@ -758,6 +769,86 @@
             spoilers[i].setAttribute('style', 'color:#40454B !important')
     }
 
+   /*
+    * Yoba Translator
+    */
+   var yoba_main = {
+      'а': ["a"],
+      'б': ["b"],
+      'в': ["v"],
+      'г': ["g"],
+      'д': ["d"],
+      'е': ["ye", "e"],
+      'ё': ["yo"],
+      'ж': ["zh"],
+      'з': ["z"],
+      'и': ["i", "ee"],
+      'й': ["y", "j"],
+      'к': ["k", "ck", "q"],
+      'л': ["l"],
+      'м': ["m"],
+      'н': ["n"],
+      'о': ["o", "ou"],
+      'п': ["p"],
+      'р': ["r"],
+      'с': ["s"],
+      'т': ["t"],
+      'у': ["oo", "u"],
+      'ф': ["f"],
+      'х': ["kh"],
+      'ц': ["c"],
+      'ч': ["ch"],
+      'ш': ["sh"],
+      'щ': ["sh"],
+      'ы': ["y", "i"],
+      'э': ["e"],
+      'ю': ["yu"],
+      'я': ["ya"],
+   };
+
+   var yoba_ends = {
+      'и': ["ey"],
+      'е': ["eu"],
+      'о': ["ou"],
+   };
+
+   function pickRandomElement(arr)
+   {
+      if(arr.length == 0)
+         return null;
+      else
+         return arr[Math.floor(Math.random() * arr.length)];
+   }
+
+   function yobaTranslate(str)
+   {
+      var result = "";
+
+      str = str.replace(/[ьъ]/gi, "");
+
+      for(var pos = 0; pos < str.length; pos++)
+      {
+         var from = str[pos];
+         var to   = '';
+
+         var is_upper = from == from.toUpperCase();
+         from = from.toLowerCase();
+
+         if(yoba_ends[from] && (!str[pos + 1] || /[\ \.,!\?]/.test(str[pos + 1])))
+            to = pickRandomElement(yoba_ends[from]);
+         else if(yoba_main[from])
+            to = pickRandomElement(yoba_main[from]);
+         else
+            to = from;
+
+         if(is_upper)
+            to = to.toUpperCase();
+
+         result += to;
+      }
+
+      return result;
+   }
 
    /*
     *      Menu
