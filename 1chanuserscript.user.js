@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.2.2
+// @version 1.3.0
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -836,7 +836,7 @@
          var is_upper = from == from.toUpperCase();
          from = from.toLowerCase();
 
-         if(yoba_ends[from] && (!str[pos + 1] || /[\ \.,!\?]/.test(str[pos + 1])))
+         if(yoba_ends[from] && (!str[pos + 1] || /[\s\.,!\?]/.test(str[pos + 1])))
             to = pickRandomElement(yoba_ends[from]);
          else if(yoba_main[from])
             to = pickRandomElement(yoba_main[from]);
