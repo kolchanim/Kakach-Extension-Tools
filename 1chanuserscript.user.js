@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.3.0
+// @version 1.3.1
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -15,11 +15,15 @@
     var deletingSmiles;
     var locationPrefix;
     var hidePatterns;
-    var features = ['answermap', 'hiding', 'smiles', 'markup', 'spoliers',
-                    'show-hidden', 'form-settings', 'panel-hiding', 'markup-top'];
+    var features = ['answermap', 'hiding', 'smiles', 'markup', 'spoilers',
+                    'show-hidden', 'form-settings', 'panel-hiding', 'markup-top',
+                    'hide-short-news'
+                   ];
     var descriptions = ['Построение карты ответов', 'Скрытие постов', 'Панель смайлов',
                         'Панель разметки', 'Раскрытие спойлеров', 'Показывать скрытые комментарии',
-                        'Настройки рядом с формой', 'Убирать панель по клику', 'Разметка над формой'];
+                        'Настройки рядом с формой', 'Убирать панель по клику', 
+                        'Разметка над формой', 'Скрывать новости короче 140 символов'
+                       ];
     var enabledFeatures;
     var VERSION = '100';
 
@@ -177,10 +181,15 @@
             
         var threads = document.getElementsByClassName('b-blog-entry');
         for(var i=0; i < threads.length; i++) {
-            var threadOpPost = threads[i].getElementsByClassName('b-blog-entry_b-body')[0];
-            var threadTitle = threads[i].getElementsByClassName('b-blog-entry_b-header')[0];
+            var threadOpPost = threads[i].getElementsByClassName('b-blog-entry_b-body')[0].textContent;
+            var threadTitle = threads[i].getElementsByClassName('b-blog-entry_b-header')[0].textContent;
+            var hideShort = enabledFeatures.indexOf("hide-short-news")!= -1
             for(var j=0; j < hidePatterns.length; j++)
-                if(hidePatterns[j].test(threadOpPost.textContent) || hidePatterns[j].test(threadTitle.textContent)) {
+                if(
+                    hidePatterns[j].test(threadOpPost) ||
+                    hidePatterns[j].test(threadTitle)  ||
+                   (hideShort && threadOpPost.length < 140)
+                  ) {
                     hideThread(threads[i]);
                     break;
                 }
@@ -688,16 +697,15 @@
     function mListClick() {
     }
     
-   function yobaClick()
-   {
-      var selected_text = getSelectionText(formTextarea);
-      var has_selected = selected_text.length != 0;
+    function yobaClick() {
+        var selected_text = getSelectionText(formTextarea);
+        var has_selected = selected_text.length != 0;
 
-      if(has_selected)
-         addTextToForm(yobaTranslate(selected_text));
-      else
-         formTextarea.value = yobaTranslate(formTextarea.value)
-   }
+        if(has_selected)
+           addTextToForm(yobaTranslate(selected_text));
+        else
+           formTextarea.value = yobaTranslate(formTextarea.value)
+    }
 
     function createMarkupPanel() {
       
@@ -812,8 +820,7 @@
       'о': ["ou"],
    };
 
-   function pickRandomElement(arr)
-   {
+   function pickRandomElement(arr) {
       if(arr.length == 0)
          return null;
       else if(arr.length == 1)
@@ -822,8 +829,7 @@
          return arr[Math.floor(Math.random() * arr.length)];
    }
 
-   function yobaTranslate(str)
-   {
+   function yobaTranslate(str) {
       var result = "";
 
       str = str.replace(/[ьъ]/gi, "");
