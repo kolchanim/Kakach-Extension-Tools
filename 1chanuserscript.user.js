@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.3.1
+// @version 1.3.2
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -197,11 +197,15 @@
     }
     
     function hideThread(node) {
-        node.setAttribute("class", "b-blog-entry m-hide");
-        var h = node.getElementsByClassName('b-blog-entry_b-header')[0];
-        h.onclick = function() {
-            showThread(node);
-            return false;
+        if(enabledFeatures.indexOf("show-hidden")!= -1) {
+            node.setAttribute("class", "b-blog-entry m-hide");
+            var h = node.getElementsByClassName('b-blog-entry_b-header')[0];
+            h.onclick = function() {
+                showThread(node);
+                return false;
+            }
+        } else {
+            node.style.display = "none";
         }
     }
     
@@ -221,7 +225,7 @@
             }
             button.getElementsByTagName('img')[0].setAttribute("src", "http://img440.imageshack.us/img440/162/ohmyeyes1.png");
         } else {
-            node.style.display = "none";
+            node.parentNode.removeChild(node);
         }
         localStorage.setItem(node.id, node.id);
     }
