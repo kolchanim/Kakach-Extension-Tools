@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere
-// @version 1.3.2
+// @version 1.3.3
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -356,7 +356,7 @@
     function addCustomSmile(link) {
         
         var id  = "smile-"+link;
-        var newSmile = createSmile(wrapImageLink(link), link);
+        var newSmile = createSmile('"' + wrapImageLink(link) + '":' + link, link);
         
         newSmile.onmousedown = function(e) {
             if (e.which === 2) {
