@@ -12,7 +12,7 @@
 Установка
 =========
 ***
-Последнюю версию скрипта всегда можно скачать по [этому адресу](https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js).
+Последнюю версию скрипта всегда можно скачать по [этому адресу](https://raw.github.com/ayakudere/1chan-Extension-Tools/master/1chanuserscript.user.js).
 - Пользователям Firefox необходимо иметь расширение GreaseMonkey
 - Пользователям Opera необходимо сменить расширение скрипта на .js, скопировать его в определенную папку и указать путь к ней в Настройки > Расширенные > Содержимое > Настройки JavaScript
 - Пользователям Chrome необходимо установить браузер вместо трояна
