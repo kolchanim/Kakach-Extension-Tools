@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name 1chan Extension Tools
-// @author postman, ayakudere
-// @version 1.3.3
+// @author postman, ayakudere, theanonym
+// @version 1.3.4
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
-// @downloadURL https://raw.github.com/postmanlololol/1chan-Extension-Tools/master/1chanuserscript.user.js
+// @downloadURL https://github.com/ayakudere/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
 // @grant       none
 // ==/UserScript==
@@ -15,17 +15,31 @@
     var deletingSmiles;
     var locationPrefix;
     var hidePatterns;
-    var features = ['answermap', 'hiding', 'smiles', 'markup', 'spoilers',
-                    'show-hidden', 'form-settings', 'panel-hiding', 'markup-top',
+    var repliesTable = {};
+    var locationPrefix = /\.ru\/([^/]+)/.exec(document.URL)[1]
+    
+    const features = [
+                    'answermap', 'hiding', 'smiles', 'markup', 'spoilers',
+                    'show-hidden', 'recursive-hidding', 'form-settings', 'panel-hiding', 'markup-top',
                     'hide-short-news'
                    ];
-    var descriptions = ['Построение карты ответов', 'Скрытие постов', 'Панель смайлов',
+    const descriptions = [
+                        'Построение карты ответов', 'Скрытие постов', 'Панель смайлов',
                         'Панель разметки', 'Раскрытие спойлеров', 'Показывать скрытые комментарии',
-                        'Настройки рядом с формой', 'Убирать панель по клику', 
+                        'Скрывать ответы на скрытый пост', 'Настройки рядом с формой', 'Убирать панель по клику', 
                         'Разметка над формой', 'Скрывать новости короче 140 символов'
                        ];
+    const icons = {
+        'hide': "http://1chan.ru/ico/oh-my-eyes.png",
+        'show': "http://img440.imageshack.us/img440/162/ohmyeyes1.png",
+        'addSmile': "http://cdn1.iconfinder.com/data/icons/basicset/plus_16.png",
+        'redCross': "http://1chan.ru/ico/remove.gif",
+        'whiteCross': "http://1chan.ru/ico/delete.gif",
+        'settings': "http://cdn1.iconfinder.com/data/icons/munich/16x16/settings.png",
+        'regexp': "http://vll.java.net/images/GrammarIconRegex.gif"
+    }
     var enabledFeatures;
-    var VERSION = '100';
+    const VERSION = '100';
 
 
    /* 
@@ -34,23 +48,21 @@
 
     function createRepliesMap() {
         
-        locationPrefix = /\.ru\/([^/]+)/.exec(document.URL)[1]
         var comments = document.getElementsByClassName("b-comment");
-        var table = {};
-        
+             
         for(var i=0; i<comments.length; i++) {
             current_post = comments[i].id.slice(locationPrefix == 'news' ? 8 : 
                 (locationPrefix.length + 9) );
-            refs = comments[i].getElementsByClassName("js-cross-link");
+            var refs = comments[i].getElementsByClassName("js-cross-link");
             for(var j=0; j<refs.length; j++) {
-                ref = refs[j].name.slice(locationPrefix.length + 1);
-                if(typeof(table[ref]) != 'undefined')
-                    table[ref].push(current_post);
+                var ref = refs[j].name.slice(locationPrefix.length + 1);
+                if(typeof(repliesTable[ref]) != 'undefined')
+                    repliesTable[ref].push(current_post);
                 else
-                    table[ref] = [current_post];
+                    repliesTable[ref] = [current_post];
             }
         }
-        for(post_num in table) {
+        for(post_num in repliesTable) {
             container = document.createElement("div");
             container.id = "answers_"+post_num;
             container.appendChild(document.createElement('p'));
@@ -59,12 +71,12 @@
             container.style.padding = '4px';
             container.style.fontSize = '0.8em';
             container.textContent = "Ответы: ";
-            for(post_ref in table[post_num]) {
+            for(post_ref in repliesTable[post_num]) {
                 link = document.createElement("a");
                 link.className = "js-cross-link";
-                link.href = document.URL + '#'+table[post_num][post_ref];
-                link.name = locationPrefix + "/" + table[post_num][post_ref];
-                link.textContent = ">>"+table[post_num][post_ref];
+                link.href = document.URL + '#'+repliesTable[post_num][post_ref];
+                link.name = locationPrefix + "/" + repliesTable[post_num][post_ref];
+                link.textContent = ">>"+repliesTable[post_num][post_ref];
                 link.style.fontSize = '1em';
                 container.appendChild(link);
                 container.innerHTML += ', ';
@@ -93,7 +105,7 @@
                             }
                         var hideButton = event.target.getElementsByClassName('b-comment_b-info')[0]
                                         .getElementsByClassName('js-remove-button')[0];
-                        hideButton.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/oh-my-eyes.png");
+                        hideButton.getElementsByTagName('img')[0].setAttribute("src", icons['hide']);
                         hideButton.style.display = "inline-block";
                         hideButton.onclick = function() {
                             hidePost(this.parentNode.parentNode);
@@ -147,15 +159,21 @@
     function hidePosts() {
         hidePatterns = [];
         var hiddenComments = [];
+        var showedComments = [];
         for(var key in localStorage) 
             if(/hidephrase/.test(key))
                 hidePatterns.push(new RegExp(localStorage[key],"i"));
-            else if(/comment_\d+/.test(key))
+            else if(/^comment_/.test(key))
                 hiddenComments.push(key);
+            else if(/^temp_comment_/.test(key)) {
+                var tempHidden = JSON.parse(localStorage.getItem(key));
+                for (var i in tempHidden)
+                    hiddenComments.push(tempHidden[i]);
+            }
         
         var hideButtons = document.getElementsByClassName('js-remove-button');
         for(var i=0; i < hideButtons.length; i++) {
-            hideButtons[i].getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/oh-my-eyes.png");
+            hideButtons[i].getElementsByTagName('img')[0].setAttribute("src", icons['hide']);
             hideButtons[i].onclick = function() {
                 hidePost(this.parentNode.parentNode);
                 return false;
@@ -215,7 +233,7 @@
         h.onclick = function() {};
     }
 
-    function hidePost(node) {
+    function hidePost(node, parentNode) {
         if(enabledFeatures.indexOf("show-hidden")!= -1) {
             node.getElementsByClassName('b-comment_b-body')[0].style.display = "none";
             var button = node.getElementsByClassName('b-comment_b-info')[0].getElementsByClassName('js-remove-button')[0];
@@ -223,11 +241,29 @@
                 showPost(node);
                 return false;
             }
-            button.getElementsByTagName('img')[0].setAttribute("src", "http://img440.imageshack.us/img440/162/ohmyeyes1.png");
+            button.getElementsByTagName('img')[0].setAttribute("src", icons['show']);
         } else {
             node.parentNode.removeChild(node);
         }
-        localStorage.setItem(node.id, node.id);
+        if (enabledFeatures.indexOf("recursive-hidding") != -1) {
+            var idPrefix = locationPrefix == 'news' ? 'comment_' : 'comment_' + locationPrefix + '_';
+            var replies = repliesTable[node.id.slice(idPrefix.length)];
+            for (var i in replies) {
+                hidePost(document.getElementById(idPrefix + replies[i]), node);
+            }
+        }
+        if (parentNode) {
+            var tempHidden = JSON.parse(localStorage.getItem('temp_' + parentNode.id));
+            if (tempHidden) {
+                tempHidden.push(node.id);
+            } else {
+                tempHidden = [node.id];
+            }
+            localStorage.setItem('temp_' + parentNode.id, JSON.stringify(tempHidden));
+        } else {
+            localStorage.setItem(node.id, node.id);
+        }
+        return false;
     }
 
     function showPost(node) {
@@ -237,8 +273,16 @@
             hidePost(node);
             return false;
         }
-        button.getElementsByTagName('img')[0].setAttribute("src", "http://1chan.ru/ico/oh-my-eyes.png");
+        button.getElementsByTagName('img')[0].setAttribute("src", icons['hide']);
         localStorage.removeItem(node.id);
+        var tempHidden = JSON.parse(localStorage.getItem('temp_' + node.id));
+        if (tempHidden) {
+            for (var i in tempHidden) {
+                showPost(document.getElementById(tempHidden[i]));
+            }
+            localStorage.removeItem('temp_' + node.id);
+        }
+        return false;
     }
 
 
@@ -409,8 +453,8 @@
     }
 
     function removeSmilesClick(e) {
-        const redCross = "http://1chan.ru/ico/remove.gif";
-        const whiteCross = "http://1chan.ru/ico/delete.gif";
+        const redCross = icons['redCross'];
+        const whiteCross = icons['whiteCross'];
         
         if (!deletingSmiles) {
             document.getElementById("remove-smiles-icon").src = whiteCross;
@@ -442,7 +486,7 @@
         
         var addSmileLink  = document.createElement("a");
         var addSmileImg = document.createElement("img");
-        addSmileImg.src = "http://cdn1.iconfinder.com/data/icons/basicset/plus_16.png";
+        addSmileImg.src = icons['addSmile'];
         addSmileLink.href = "#";
         addSmileLink.onclick = addSmileClick;
         addSmileLink.appendChild(addSmileImg);
@@ -450,7 +494,7 @@
         
         var removeSmilesLink  = document.createElement("a");
         var removeSmilesImg = document.createElement("img");
-        removeSmilesImg.src = "http://1chan.ru/ico/remove.gif";
+        removeSmilesImg.src = icons['redCross'];
         removeSmilesImg.id = "remove-smiles-icon";
         removeSmilesLink.href = "#";
         removeSmilesLink.onclick = removeSmilesClick;
@@ -695,12 +739,6 @@
         addTextToForm('<s>' + text + '</s>');
     }
     
-    function numListClick() {
-    }
-    
-    function mListClick() {
-    }
-    
     function yobaClick() {
         var selected_text = getSelectionText(formTextarea);
         var has_selected = selected_text.length != 0;
@@ -879,10 +917,10 @@
         hidelist.id = "hiding-list-button";
         if(enabledFeatures.indexOf('form-settings')!= -1) {
             var generalIcon = document.createElement("img");
-            generalIcon.src = "http://cdn1.iconfinder.com/data/icons/munich/16x16/settings.png";
+            generalIcon.src = icons['settings'];
             general.appendChild(generalIcon);
             var regexpIcon = document.createElement("img");
-            regexpIcon.src = "http://vll.java.net/images/GrammarIconRegex.gif";
+            regexpIcon.src = icons['regexp'];
             hidelist.appendChild(regexpIcon);
             var container = formTextarea.parentNode.parentNode.getElementsByTagName("div")[0];
             hidelist.style.cssFloat = "right";
