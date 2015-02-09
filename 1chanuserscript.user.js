@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name 1chan Extension Tools
 // @author postman, ayakudere, theanonym
-// @version 1.3.4
+// @version 1.3.5
 // @icon http://1chan.ru/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/ayakudere/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
 // @include http://1chan.ru/*
@@ -300,10 +300,16 @@
     };
 
     function wrapImageLink(link) {
-        if (/rghost/.test(link)) 
-            return '[:' + /\d+/.exec(link)[0] + ':]';
-        else
+        if (!link)
+            return;
+        if (/rghost/.test(link)) { 
+            var a = /rghost.ru\/([\d\w]{9})/.exec(link);
+            if (a) {
+                return '[:' + a[1] + ':]';
+            }
+        } else {
             return '[' + link + ']';
+        }
     }
 
     function createSmile(text, imgLink) {
@@ -400,7 +406,10 @@
     function addCustomSmile(link) {
         
         var id  = "smile-"+link;
-        var newSmile = createSmile('"' + wrapImageLink(link) + '":' + link, link);
+        var wrappedLink = wrapImageLink(link);
+        if (!wrappedLink)
+            return;
+        var newSmile = createSmile('"' + wrappedLink + '":' + link, link);
         
         newSmile.onmousedown = function(e) {
             if (e.which === 2) {
@@ -428,8 +437,8 @@
         if (!link)
             return false;
         
-        if (/(\d+)\D*$/.test(link))
-            var num = /(\d+)\D*$/.exec(link)[1];
+        if (/([\d\w]{9})/.test(link))
+            var num = /([\d\w]{9})/.exec(link)[1];
         
         image.src = link;
         image.onerror = function() {
@@ -646,16 +655,6 @@
         return button;
     }
 
-    function wrapImageLink(link) {
-        if (!link) {
-            return "";
-        } else if (/rghost/.test(link)) {
-            return "[:" + /(\d+)\D*$/.exec(link)[1] + ":]";
-        } else {
-            return "[" + link + "]";
-        }
-    }
-
     function imgClick() {
       
         var link = getSelectionText(formTextarea);
@@ -726,8 +725,8 @@
             formTextarea.focus();
             return false;
         }
-        if (/rghost|^[^\/]*\d+[^\/]*$/.test(link)) {
-            var num = /(\d+)\D*$/.exec(link)[1];
+        if (/rghost|^[\d\w]{9}$/.test(link)) {
+            var num = /([\d\w]{9})/.exec(link)[1];
             link = "http://rghost.ru/" + num + "/image.png";
         }
       
