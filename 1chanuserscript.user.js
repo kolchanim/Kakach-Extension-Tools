@@ -16,7 +16,7 @@
     var locationPrefix;
     var hidePatterns;
     var repliesTable = {};
-    var locationPrefix = /\.ru\/([^/]+)/.exec(document.URL)[1]
+    var locationPrefix = /\.(?:ru|org|ca)\/([^/]+)/.exec(document.URL)[1]
     
     const features = [
                     'answermap', 'hiding', 'smiles', 'markup', 'spoilers',
