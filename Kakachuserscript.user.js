@@ -1,12 +1,13 @@
 // ==UserScript==
-// @name 1chan Extension Tools
-// @author postman, ayakudere, theanonym
-// @version 1.3.6
-// @icon http://1chan.ru/ico/favicons/1chan.ru.gif
-// @downloadURL https://github.com/ayakudere/1chan-Extension-Tools/raw/master/1chanuserscript.user.js
-// @include http://1chan.ru/*
+// @name Kakach Extension Tools
+// @author Original by postman, ayakudere, theanonym; forked by Ananim
+// @version 1.0.0 (ca)
+// @icon http://1chan.ca/ico/favicons/1chan.ru.gif
+// @downloadURL https://github.com/1chan-level-journalist/Kakach-Extension-Tools/raw/master/Kakachuserscript.user.js
+// @include http://1chan.ca/*
 // @grant       none
 // ==/UserScript==
+
 
 (function(document) {
 
@@ -30,11 +31,11 @@
                         'Разметка над формой', 'Скрывать новости короче 140 символов'
                        ];
     const icons = {
-        'hide': "http://1chan.ru/ico/oh-my-eyes.png",
-        'show': "http://img440.imageshack.us/img440/162/ohmyeyes1.png",
+        'hide': "http://1chan.ca/ico/oh-my-eyes.png",
+        'show': "http://1chan.ca/ico/oh-my-eyes.png",
         'addSmile': "http://cdn1.iconfinder.com/data/icons/basicset/plus_16.png",
-        'redCross': "http://1chan.ru/ico/remove.gif",
-        'whiteCross': "http://1chan.ru/ico/delete.gif",
+        'redCross': "http://1chan.ca/ico/remove.gif",
+        'whiteCross': "http://1chan.ca/ico/delete.gif",
         'settings': "http://cdn1.iconfinder.com/data/icons/munich/16x16/settings.png",
         'regexp': "http://vll.java.net/images/GrammarIconRegex.gif"
     }
@@ -90,7 +91,7 @@
     }
       
     function registerAutoupdateHandler() {
-        if(/\.ru\/news\/add/.test(document.URL))
+        if(/\.ca\/news\/add/.test(document.URL))
             return;
         document.getElementsByClassName("l-comments-wrap")[0].addEventListener('DOMNodeInserted',
             function(event) {
@@ -226,6 +227,7 @@
             node.style.display = "none";
         }
     }
+	
     
     function showThread(node) {
         node.setAttribute("class", "b-blog-entry");
@@ -302,10 +304,13 @@
     function wrapImageLink(link) {
         if (!link)
             return;
-        if (/rghost/.test(link)) { 
-            var a = /rghost.ru\/([\d\w]{9})/.exec(link);
+        if (/imgur/.test(link)) { 
+            var d = /i.imgur.com\/([^\]\[]+)/.exec(link);
+			var c = d[1].replace('.jpg', '');
+			var b = c.replace('.png', '');
+			var a = b.replace('.gif', '');
             if (a) {
-                return '[:' + a[1] + ':]';
+                return '[:' + a + ':]';
             }
         } else {
             return '[' + link + ']';
@@ -359,8 +364,7 @@
         var newImage = createButton(name, function(e) {
             if (deletingSmiles)
                 destroyCustomImage(this.id);
-            else {
-                addTextToForm(wrapImageLink(link));
+            else {addTextToForm('"'+wrapImageLink(link)+'":'+link);
                 formTextarea.focus();
             }
             e.preventDefault();
@@ -431,7 +435,7 @@
 
     function addSmileClick(e) {
         
-        var link = prompt("Ссылка на картинку или номер файла на ргхосте:");
+        var link = prompt("Ссылка на картинку или имя файла на ргхосте:");
         var image = new Image();
         
         if (!link)
@@ -480,16 +484,16 @@
     function createSmilePanel() {
       
         var container = document.createElement("div");
-        var gifSmileList = [ "coolface", "desu", "nyan", "sobak", "trollface"];
-        var pngSmileList = ["awesome", "ffuu", "okay", "rage"];
+        var gifSmileList = [ "coolface", "desu", "nyan", "sobak", "trollface", "popka", "popka2", "pauk", "slon"];
+        var pngSmileList = ["awesome", "ffuu", "okay", "rage", "doge", "sheez", "spice"];
         var imageContainer = document.createElement("div");
         
         for(var i in gifSmileList) {
-            var newSmile = createSmile(':'+gifSmileList[i]+':', "http://1chan.ru/img/" + gifSmileList[i] + ".gif"); 
+            var newSmile = createSmile(':'+gifSmileList[i]+':', "http://1chan.ca/img/" + gifSmileList[i] + ".gif"); 
             container.appendChild(newSmile);
         }
         for(var i in pngSmileList) {
-            var newSmile = createSmile(':'+pngSmileList[i]+':', "http://1chan.ru/img/" + pngSmileList[i] + ".png"); 
+            var newSmile = createSmile(':'+pngSmileList[i]+':', "http://1chan.ca/img/" + pngSmileList[i] + ".png"); 
             container.appendChild(newSmile);
         }
         
@@ -521,7 +525,14 @@
         container.appendChild(controlsContainer);
         container.style.minHeight = "50px";
         
-        if(/\.ru\/news\/add/.test(document.URL)) { // news/add
+        if(/\.ca\/news\/add/.test(document.URL)) { // news/add
+            container.style.width = '530px'
+            container.style.border = "1px solid #999999";
+            container.id = "smile-panel";
+            document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
+                                                        document.getElementsByName('text_full')[0]);
+        }
+		else if(/\.ca\/news\/add/.test(document.URL)) { // news/add
             container.style.width = '530px'
             container.style.border = "1px solid #999999";
             container.id = "smile-panel";
@@ -538,7 +549,7 @@
             formBody.parentNode.insertBefore(container, formBody);
         }
         
-        if(/\.ru\/news/.test(document.URL)) {
+        if(/\.ca\/news/.test(document.URL)) {
             var images = [];
             for(var i = 0; i < localStorage.length; i++) {
                 var key = localStorage.key(i);
@@ -603,7 +614,7 @@
         hideContainer.style.fontSize = "0.65em";
         hideContainer.id = "hide-panel-button";
         
-        if(/\.ru\/news\/add/.test(document.URL)) {
+        if(/\.ca\/news\/add/.test(document.URL)) {
             hideContainer.style.margin = "3px 0px 4px 220px";
             showContainer.style.margin = "3px 0px 4px 210px";
         } else {
@@ -724,13 +735,17 @@
         if (!link) {
             formTextarea.focus();
             return false;
-        }
-        if (/rghost|^[\d\w]{9}$/.test(link)) {
-            var num = /([\d\w]{9})/.exec(link)[1];
-            link = "http://rghost.ru/" + num + "/image.png";
+        }if (/imgur/.test(link)) { 
+            var e = /i.imgur.com\/([^\]\[]+)/.exec(link);
+			var d = e[1].replace('.jpg', '');
+			var c = d.replace('.webm', '');
+			var b = c.replace('.png', '');
+			var a = b.replace('.gif', '');
+            var num = a;
+            link = "http://imgur.com/" + num + "/";
         }
       
-        addTextToForm('"' + wrapImageLink(link) + '":' + link + '');
+        addTextToForm('"[:' + num + ':]":' + link + '');
     }
 
     function strikeThroughClick() {
@@ -760,7 +775,7 @@
         
         var buttons = {
             "img": imgClick,
-            "bimg": bigImgClick,
+			"bimg": bigImgClick,
             ">": quoteClick,
             "S": strikeThroughClick,
             "BB": bigBoldClick,
@@ -786,7 +801,7 @@
             container.appendChild(newButton);
         }
         
-        if(/\.ru\/news\/add/.test(document.URL)) {
+        if(/\.ca\/news\/add/.test(document.URL)) {
             container.style.paddingTop = "4px";
             document.getElementsByName('text_full')[0].parentNode.insertBefore(container,
                                                         document.getElementsByName('text_full')[0])
