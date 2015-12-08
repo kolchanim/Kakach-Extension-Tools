@@ -305,7 +305,7 @@
         if (!link)
             return;
         if (/imgur/.test(link)) { 
-            var d = /i.imgur.com\/([^\]\[]+)/.exec(link);
+            var d = /imgur.com\/([^\]\[]+)/.exec(link);
 			var c = d[1].replace('.jpg', '');
 			var b = c.replace('.png', '');
 			var a = b.replace('.gif', '');
@@ -731,12 +731,12 @@
         var link = getSelectionText(formTextarea);
         
         if (link.length === 0) 
-            link = prompt('Ссылка на изображение или номер файла на ргхосте:');
+            link = prompt('Полная ссылка на изображение на имгуре:');
         if (!link) {
             formTextarea.focus();
             return false;
         }if (/imgur/.test(link)) { 
-            var e = /i.imgur.com\/([^\]\[]+)/.exec(link);
+            var e = /imgur.com\/([^\]\[]+)/.exec(link);
 			var d = e[1].replace('.jpg', '');
 			var c = d.replace('.webm', '');
 			var b = c.replace('.png', '');
