@@ -5,6 +5,7 @@
 // @icon http://1chan.ca/ico/favicons/1chan.ru.gif
 // @downloadURL https://github.com/1chan-level-journalist/Kakach-Extension-Tools/raw/master/Kakachuserscript.user.js
 // @include http://1chan.ca/*
+// @include https://1chan.ca/*
 // @grant       none
 // ==/UserScript==
 
