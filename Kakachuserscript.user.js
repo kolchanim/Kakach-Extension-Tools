@@ -486,7 +486,7 @@
       
         var container = document.createElement("div");
         var gifSmileList = [ "coolface", "desu", "nyan", "sobak", "trollface", "popka", "popka2", "pauk", "slon", "cheez", "weed"];
-        var pngSmileList = ["awesome", "ffuu", "okay", "rage", "doge", "sheez", "spice"];
+        var pngSmileList = ["awesome", "ffuu", "okay", "rage", "doge", "sheez", "spice", "hero"];
         var imageContainer = document.createElement("div");
         
         for(var i in gifSmileList) {
