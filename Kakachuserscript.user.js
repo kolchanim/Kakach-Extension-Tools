@@ -485,7 +485,7 @@
     function createSmilePanel() {
       
         var container = document.createElement("div");
-        var gifSmileList = [ "coolface", "desu", "nyan", "sobak", "trollface", "popka", "popka2", "pauk", "slon", "cheez", "weed"];
+        var gifSmileList = [ "coolface", "desu", "nyan", "sobak", "trollface", "popka", "popka2", "pauk", "slon", "cheez", "weed", "makak"];
         var pngSmileList = ["awesome", "ffuu", "okay", "rage", "doge", "sheez", "spice", "hero"];
         var imageContainer = document.createElement("div");
         
