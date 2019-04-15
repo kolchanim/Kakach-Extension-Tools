@@ -32,13 +32,13 @@
                         'Разметка над формой', 'Скрывать новости короче 140 символов'
                        ];
     const icons = {
-        'hide': " https://1chan.ca/ico/oh-my-eyes.png",
-        'show': " https://1chan.ca/ico/oh-my-eyes-2.png",
-        'addSmile': " https://1chan.ca/ico/plus.png",
-        'redCross': " https://1chan.ca/ico/remove.gif",
-        'whiteCross': " https://1chan.ca/ico/delete.gif",
-        'settings': " https://1chan.ca/ico/settings2.png",
-        'regexp': " https://1chan.ca/ico/R.gif"
+        'hide': "https://1chan.ca/ico/oh-my-eyes.png",
+        'show': "https://1chan.ca/ico/oh-my-eyes-2.png",
+        'addSmile': "https://1chan.ca/ico/plus.png",
+        'redCross': "https://1chan.ca/ico/remove.gif",
+        'whiteCross': "https://1chan.ca/ico/delete.gif",
+        'settings': "https://1chan.ca/ico/settings2.png",
+        'regexp': "https://1chan.ca/ico/R.gif"
     }
     var enabledFeatures;
     const VERSION = '100';
@@ -448,7 +448,7 @@
         image.src = link;
         image.onerror = function() {
             if(num) {
-                link = " https://rghost.ru/" + num + "/image.png";
+                link = "https://rghost.ru/" + num + "/image.png";
                 image.src = link;
             }
             image.onerror = function() {
@@ -490,11 +490,11 @@
         var imageContainer = document.createElement("div");
         
         for(var i in gifSmileList) {
-            var newSmile = createSmile(':'+gifSmileList[i]+':', " https://1chan.ca/img/" + gifSmileList[i] + ".gif"); 
+            var newSmile = createSmile(':'+gifSmileList[i]+':', "https://1chan.ca/img/" + gifSmileList[i] + ".gif"); 
             container.appendChild(newSmile);
         }
         for(var i in pngSmileList) {
-            var newSmile = createSmile(':'+pngSmileList[i]+':', " https://1chan.ca/img/" + pngSmileList[i] + ".png"); 
+            var newSmile = createSmile(':'+pngSmileList[i]+':', "https://1chan.ca/img/" + pngSmileList[i] + ".png"); 
             container.appendChild(newSmile);
         }
         
@@ -743,7 +743,7 @@
 			var b = c.replace('.png', '');
 			var a = b.replace('.gif', '');
             var num = a;
-            link = " https://imgur.com/" + num + "/";
+            link = "https://imgur.com/" + num + "/";
         }
       
         addTextToForm('"[:' + num + ':]":' + link + '');
@@ -1098,8 +1098,3 @@
     }
 
 })(document);
-
-// End of userscript ===================================================
-});
-}
-addJQuery(myUserScript);
