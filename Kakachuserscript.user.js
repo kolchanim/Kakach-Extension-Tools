@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name Kakach Extension Tools
-// @author Original by postman, ayakudere, theanonym; forked by Ananim
-// @version 1.0.0 (ca)
+// @author Original by postman, ayakudere, theanonym; forked by Ananim with noname-chmo kostyls 
+// @version 1.0.2 (ca)
 // @icon http://1chan.ca/ico/favicons/1chan.ru.gif
-// @downloadURL https://github.com/1chan-level-journalist/Kakach-Extension-Tools/raw/master/Kakachuserscript.user.js
+// @downloadURL https://github.com/kolchanim/Kakach-Extension-Tools/raw/master/Kakachuserscript.user.js
 // @include http://1chan.ca/*
 // @include https://1chan.ca/*
 // @grant       none
@@ -32,13 +32,13 @@
                         'Разметка над формой', 'Скрывать новости короче 140 символов'
                        ];
     const icons = {
-        'hide': "http://1chan.ca/ico/oh-my-eyes.png",
-        'show': "http://1chan.ca/ico/oh-my-eyes.png",
-        'addSmile': "http://cdn1.iconfinder.com/data/icons/basicset/plus_16.png",
-        'redCross': "http://1chan.ca/ico/remove.gif",
-        'whiteCross': "http://1chan.ca/ico/delete.gif",
-        'settings': "http://cdn1.iconfinder.com/data/icons/munich/16x16/settings.png",
-        'regexp': "http://vll.java.net/images/GrammarIconRegex.gif"
+        'hide': " https://1chan.ca/ico/oh-my-eyes.png",
+        'show': " https://1chan.ca/ico/oh-my-eyes-2.png",
+        'addSmile': " https://1chan.ca/ico/plus.png",
+        'redCross': " https://1chan.ca/ico/remove.gif",
+        'whiteCross': " https://1chan.ca/ico/delete.gif",
+        'settings': " https://1chan.ca/ico/settings2.png",
+        'regexp': " https://1chan.ca/ico/R.gif"
     }
     var enabledFeatures;
     const VERSION = '100';
@@ -448,7 +448,7 @@
         image.src = link;
         image.onerror = function() {
             if(num) {
-                link = "http://rghost.ru/" + num + "/image.png";
+                link = " https://rghost.ru/" + num + "/image.png";
                 image.src = link;
             }
             image.onerror = function() {
@@ -486,15 +486,15 @@
       
         var container = document.createElement("div");
         var gifSmileList = [ "coolface", "desu", "nyan", "sobak", "trollface", "popka", "popka2", "pauk", "slon", "cheez", "weed", "makak"];
-        var pngSmileList = ["awesome", "ffuu", "okay", "rage", "doge", "sheez", "spice", "hero", "omsk"];
+        var pngSmileList = ["awesome", "ffuu", "okay", "rage", "omsk", "doge", "sheez", "spice", "hero", "yajka", "deb"];
         var imageContainer = document.createElement("div");
         
         for(var i in gifSmileList) {
-            var newSmile = createSmile(':'+gifSmileList[i]+':', "http://1chan.ca/img/" + gifSmileList[i] + ".gif"); 
+            var newSmile = createSmile(':'+gifSmileList[i]+':', " https://1chan.ca/img/" + gifSmileList[i] + ".gif"); 
             container.appendChild(newSmile);
         }
         for(var i in pngSmileList) {
-            var newSmile = createSmile(':'+pngSmileList[i]+':', "http://1chan.ca/img/" + pngSmileList[i] + ".png"); 
+            var newSmile = createSmile(':'+pngSmileList[i]+':', " https://1chan.ca/img/" + pngSmileList[i] + ".png"); 
             container.appendChild(newSmile);
         }
         
@@ -743,7 +743,7 @@
 			var b = c.replace('.png', '');
 			var a = b.replace('.gif', '');
             var num = a;
-            link = "http://imgur.com/" + num + "/";
+            link = " https://imgur.com/" + num + "/";
         }
       
         addTextToForm('"[:' + num + ':]":' + link + '');
@@ -1098,3 +1098,8 @@
     }
 
 })(document);
+
+// End of userscript ===================================================
+});
+}
+addJQuery(myUserScript);
